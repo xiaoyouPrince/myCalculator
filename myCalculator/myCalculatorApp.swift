@@ -12,6 +12,8 @@ struct myCalculatorApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .frame(minWidth: 980, minHeight: 620)
         }
+        .defaultSize(width: 1080, height: 700)
     }
 }
