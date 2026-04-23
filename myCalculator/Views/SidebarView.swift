@@ -23,6 +23,7 @@ struct SidebarView: View {
                                 Text(summary.timeRangeText)
                                 Text(summary.workDurationText)
                                 Text(summary.workHoursText)
+                                Text(summary.declaredWorkHoursText)
                                 Text(summary.overtimeText)
                                 Text(summary.effectiveOvertimeText)
                             } else {
@@ -39,6 +40,7 @@ struct SidebarView: View {
                             if let summary = selectedWeekSummary {
                                 Text("录入天数 \(summary.recordedDays) 天")
                                 Text("周工作时长 \(String(format: "%.2f", summary.workHours)) 小时")
+                                Text("周工时申报 \(String(format: "%.2f", summary.declaredWorkHours)) 小时")
                                 Text("周加班时长 \(String(format: "%.2f", summary.overtimeHours)) 小时")
                                 Text("周有效加班 \(String(format: "%.2f", summary.effectiveOvertimeHours)) 小时")
                             } else {
@@ -55,6 +57,7 @@ struct SidebarView: View {
                             if let summary = selectedMonthSummary {
                                 Text("录入天数 \(summary.recordedDays) 天")
                                 Text("月工作时长 \(String(format: "%.2f", summary.workHours)) 小时")
+                                Text("月工时申报 \(String(format: "%.2f", summary.declaredWorkHours)) 小时")
                                 Text("月加班时长 \(String(format: "%.2f", summary.overtimeHours)) 小时")
                                 Text("月有效加班 \(String(format: "%.2f", summary.effectiveOvertimeHours)) 小时")
                             } else {
@@ -176,12 +179,14 @@ struct SidebarView: View {
         guard !schedulesInWeek.isEmpty else { return nil }
 
         var totalWorkMinutes = 0
+        var totalDeclaredWorkHours = 0.0
         var totalOvertimeHours = 0.0
         var totalEffectiveOvertimeHours = 0.0
 
         for (_, schedule) in schedulesInWeek {
             let metrics = WorkMetrics.from(schedule: schedule)
             totalWorkMinutes += metrics.workMinutes
+            totalDeclaredWorkHours += metrics.declaredWorkHours
             totalOvertimeHours += metrics.overtimeHours
             totalEffectiveOvertimeHours += metrics.effectiveOvertimeHours
         }
@@ -189,6 +194,7 @@ struct SidebarView: View {
         return WeekSummary(
             recordedDays: schedulesInWeek.count,
             workHours: Double(totalWorkMinutes) / 60.0,
+            declaredWorkHours: totalDeclaredWorkHours,
             overtimeHours: totalOvertimeHours,
             effectiveOvertimeHours: totalEffectiveOvertimeHours
         )
@@ -215,12 +221,14 @@ struct SidebarView: View {
         guard !schedulesInMonth.isEmpty else { return nil }
 
         var totalWorkMinutes = 0
+        var totalDeclaredWorkHours = 0.0
         var totalOvertimeHours = 0.0
         var totalEffectiveOvertimeHours = 0.0
 
         for (_, schedule) in schedulesInMonth {
             let metrics = WorkMetrics.from(schedule: schedule)
             totalWorkMinutes += metrics.workMinutes
+            totalDeclaredWorkHours += metrics.declaredWorkHours
             totalOvertimeHours += metrics.overtimeHours
             totalEffectiveOvertimeHours += metrics.effectiveOvertimeHours
         }
@@ -228,6 +236,7 @@ struct SidebarView: View {
         return WeekSummary(
             recordedDays: schedulesInMonth.count,
             workHours: Double(totalWorkMinutes) / 60.0,
+            declaredWorkHours: totalDeclaredWorkHours,
             overtimeHours: totalOvertimeHours,
             effectiveOvertimeHours: totalEffectiveOvertimeHours
         )

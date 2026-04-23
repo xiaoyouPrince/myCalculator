@@ -3,6 +3,7 @@ import SwiftUI
 struct YearView: View {
     @Binding var date: Date
     @Binding var mode: ContentView.CalendarMode
+    @Binding var daySchedules: [Date: WorkSchedule]
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -16,6 +17,7 @@ struct YearView: View {
             let months = Calendar.current.monthSymbols
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
                 ForEach(Array(months.enumerated()), id: \.offset) { index, month in
+                    let effectiveOvertime = monthlyEffectiveOvertime(month: index + 1)
                     Button {
                         let year = calendar.component(.year, from: date)
                         var components = DateComponents()
@@ -31,8 +33,15 @@ struct YearView: View {
                             .fill(Color.gray.opacity(0.08))
                             .frame(height: 90)
                             .overlay(
-                                Text(month)
-                                    .font(.headline)
+                                VStack(spacing: 4) {
+                                    Text(month)
+                                        .font(.headline)
+                                    if effectiveOvertime >= 15.0 {
+                                        Text("(\(String(format: "%.2f", effectiveOvertime)))")
+                                            .font(.subheadline)
+                                            .foregroundStyle(.secondary)
+                                    }
+                                }
                             )
                     }
                     .buttonStyle(.plain)
@@ -41,5 +50,20 @@ struct YearView: View {
             Spacer()
         }
         .padding(20)
+    }
+
+    private func monthlyEffectiveOvertime(month: Int) -> Double {
+        let calendar = Calendar.current
+        let targetYear = calendar.component(.year, from: date)
+        return daySchedules.reduce(0.0) { partial, item in
+            let day = item.key
+            let schedule = item.value
+            let year = calendar.component(.year, from: day)
+            let currentMonth = calendar.component(.month, from: day)
+            guard year == targetYear && currentMonth == month else {
+                return partial
+            }
+            return partial + WorkMetrics.from(schedule: schedule).effectiveOvertimeHours
+        }
     }
 }

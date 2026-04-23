@@ -50,6 +50,7 @@ struct WeekDetailCell: View {
                     Text(summary.timeRangeText)
                     Text(summary.workDurationText)
                     Text(summary.workHoursText)
+                    Text(summary.declaredWorkHoursText)
                     Text(summary.overtimeText)
                     Text(summary.effectiveOvertimeText)
                 } else {

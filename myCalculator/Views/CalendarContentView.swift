@@ -14,7 +14,7 @@ struct CalendarContentView: View {
         case .month:
             MonthView(date: $date, daySchedules: $daySchedules)
         case .year:
-            YearView(date: $date, mode: $mode)
+            YearView(date: $date, mode: $mode, daySchedules: $daySchedules)
         }
     }
 }
