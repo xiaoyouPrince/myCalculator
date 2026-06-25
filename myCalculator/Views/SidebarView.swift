@@ -5,7 +5,8 @@ struct SidebarView: View {
     @Binding var daySchedules: [Date: WorkSchedule]
     let onOpenJSONFile: () -> Void
     let onExportCSV: () -> Void
-    private let bottomOverlayHeight: CGFloat = 108
+    let onExportMinimalJSON: () -> Void
+    private let bottomOverlayHeight: CGFloat = 148
 
     var body: some View {
         GeometryReader { proxy in
@@ -86,6 +87,12 @@ struct SidebarView: View {
                                 }
                                 .buttonStyle(.borderedProminent)
                                 .tint(Color(nsColor: .controlAccentColor))
+
+                                Button(action: onExportMinimalJSON) {
+                                    Label("导出极简 JSON", systemImage: "arrow.down.doc")
+                                        .frame(maxWidth: .infinity)
+                                }
+                                .buttonStyle(.bordered)
 
                                 Button(action: onOpenJSONFile) {
                                     Label("查看 JSON", systemImage: "doc.text.magnifyingglass")

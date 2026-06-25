@@ -76,6 +76,28 @@ enum WorkScheduleStore {
         return ([header.map(csvField).joined(separator: ",")] + rows).joined(separator: "\n") + "\n"
     }
 
+    nonisolated static func exportMinimalJSON(from schedules: [Date: WorkSchedule]) -> String {
+        let records = schedules
+            .filter { _, schedule in schedule.isWorkLog }
+            .sorted { $0.key < $1.key }
+            .map { date, schedule in
+                MinimalWorkScheduleRecord(
+                    day: dayKey(from: date),
+                    startTime: timeText(hour: schedule.startHour, minute: schedule.startMinute),
+                    endTime: timeText(hour: schedule.endHour, minute: schedule.endMinute)
+                )
+            }
+
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        guard let data = try? encoder.encode(records),
+              let text = String(data: data, encoding: .utf8)
+        else {
+            return "[]\n"
+        }
+        return text + "\n"
+    }
+
     private static func storeDirectoryURL() -> URL {
         let baseURL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             ?? FileManager.default.temporaryDirectory
@@ -149,4 +171,10 @@ enum WorkScheduleStore {
         let escaped = value.replacingOccurrences(of: "\"", with: "\"\"")
         return "\"\(escaped)\""
     }
+}
+
+private struct MinimalWorkScheduleRecord: Encodable {
+    let day: String
+    let startTime: String
+    let endTime: String
 }

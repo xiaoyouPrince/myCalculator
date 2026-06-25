@@ -9,8 +9,8 @@ import SwiftUI
 import AppKit
 import UniformTypeIdentifiers
 
-struct CSVExportDocument: FileDocument {
-    static var readableContentTypes: [UTType] { [.commaSeparatedText] }
+struct TextExportDocument: FileDocument {
+    static var readableContentTypes: [UTType] { [.commaSeparatedText, .json] }
 
     var content: String
 
@@ -45,8 +45,10 @@ struct ContentView: View {
     @State private var selectedMode: CalendarMode = .month
     @State private var selectedDate: Date = .now
     @State private var daySchedules: [Date: WorkSchedule] = [:]
-    @State private var exportDocument = CSVExportDocument()
-    @State private var isExportingCSV = false
+    @State private var exportDocument = TextExportDocument()
+    @State private var exportContentType: UTType = .commaSeparatedText
+    @State private var exportFilename = "work-schedules"
+    @State private var isExporting = false
 
     var body: some View {
         NavigationSplitView {
@@ -54,7 +56,8 @@ struct ContentView: View {
                 selectedDate: $selectedDate,
                 daySchedules: $daySchedules,
                 onOpenJSONFile: openPersistedJSONFile,
-                onExportCSV: exportSchedulesCSV
+                onExportCSV: exportSchedulesCSV,
+                onExportMinimalJSON: exportMinimalSchedulesJSON
             )
             .frame(minWidth: 260)
             .navigationSplitViewColumnWidth(min: 260, ideal: 300, max: 340)
@@ -72,10 +75,10 @@ struct ContentView: View {
             daySchedules = WorkScheduleStore.load()
         }
         .fileExporter(
-            isPresented: $isExportingCSV,
+            isPresented: $isExporting,
             document: exportDocument,
-            contentType: .commaSeparatedText,
-            defaultFilename: "work-schedules"
+            contentType: exportContentType,
+            defaultFilename: exportFilename
         ) { _ in }
     }
 
@@ -88,8 +91,17 @@ struct ContentView: View {
     }
 
     private func exportSchedulesCSV() {
-        exportDocument = CSVExportDocument(content: WorkScheduleStore.exportCSV(from: daySchedules))
-        isExportingCSV = true
+        exportDocument = TextExportDocument(content: WorkScheduleStore.exportCSV(from: daySchedules))
+        exportContentType = .commaSeparatedText
+        exportFilename = "work-schedules"
+        isExporting = true
+    }
+
+    private func exportMinimalSchedulesJSON() {
+        exportDocument = TextExportDocument(content: WorkScheduleStore.exportMinimalJSON(from: daySchedules))
+        exportContentType = .json
+        exportFilename = "work-schedules-minimal"
+        isExporting = true
     }
 
     private var toolbar: some View {
