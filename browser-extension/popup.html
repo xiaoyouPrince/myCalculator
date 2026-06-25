@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Work Hours Autofill</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <main>
+    <section class="panel">
+      <label class="file-label">
+        <span>导入极简 JSON</span>
+        <input id="fileInput" type="file" accept="application/json,.json">
+      </label>
+      <div id="dataStatus" class="status">未导入数据</div>
+    </section>
+
+    <section class="panel">
+      <label class="field">
+        <span>填写模式</span>
+        <select id="fillMode">
+          <option value="hours" selected>工作小时数</option>
+          <option value="range">上下班时间段</option>
+        </select>
+      </label>
+      <label class="field">
+        <span>小时小数位</span>
+        <select id="precision">
+          <option value="1">1 位</option>
+          <option value="2" selected>2 位</option>
+        </select>
+      </label>
+    </section>
+
+    <button id="autofillButton" type="button">自动填写当前页</button>
+    <button id="diagnoseButton" class="secondary" type="button">诊断当前页</button>
+    <button id="clearButton" class="secondary" type="button">清空导入数据</button>
+    <div id="message" class="message"></div>
+    <textarea id="diagnoseOutput" class="diagnose-output" readonly placeholder="诊断输出"></textarea>
+  </main>
+  <script src="popup.js"></script>
+</body>
+</html>

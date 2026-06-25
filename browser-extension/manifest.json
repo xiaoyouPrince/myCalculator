@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "Work Hours Autofill",
+  "version": "0.1.0",
+  "description": "Import exported work schedule JSON and autofill monthly work-hour forms.",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Work Hours Autofill"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "all_frames": true,
+      "run_at": "document_idle"
+    }
+  ]
+}

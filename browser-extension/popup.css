@@ -1,0 +1,98 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  width: 360px;
+  margin: 0;
+  color: #1f2328;
+  font: 13px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #f6f8fa;
+}
+
+main {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+}
+
+.panel {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  background: #fff;
+  border: 1px solid #d8dee4;
+  border-radius: 8px;
+}
+
+.file-label,
+.field {
+  display: grid;
+  gap: 6px;
+  font-weight: 600;
+}
+
+input,
+select,
+button {
+  width: 100%;
+  font: inherit;
+}
+
+select,
+input[type="file"] {
+  padding: 6px;
+  background: #fff;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+}
+
+button {
+  padding: 8px 10px;
+  color: #fff;
+  background: #0969da;
+  border: 0;
+  border-radius: 6px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+button.secondary {
+  color: #24292f;
+  background: #eaeef2;
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.status,
+.message {
+  color: #57606a;
+  min-height: 18px;
+}
+
+.message.error {
+  color: #cf222e;
+}
+
+.message.ok {
+  color: #1a7f37;
+}
+
+.diagnose-output {
+  width: 100%;
+  min-height: 120px;
+  padding: 8px;
+  color: #24292f;
+  background: #fff;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  resize: vertical;
+  font: 12px/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.diagnose-output:placeholder-shown {
+  display: none;
+}
