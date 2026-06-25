@@ -2,6 +2,8 @@ import SwiftUI
 
 struct WorkTimeInputPanel: View {
     let targetDate: Date
+    @Binding var selectedKind: WorkLogKind
+    @Binding var customNote: String
     @Binding var workStartTime: Date
     @Binding var workEndTime: Date
     let onSave: () -> Void
@@ -14,15 +16,35 @@ struct WorkTimeInputPanel: View {
         targetDate.formatted(.dateTime.year().month().day().weekday(.abbreviated))
     }
 
+    private var canSave: Bool {
+        selectedKind != .custom || !customNote.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("设置时间")
+            Text("设置记录")
                 .font(.title3.bold())
             Text(dateTitle)
                 .foregroundStyle(.secondary)
 
-            TimeInputRow(title: "上班时间", value: $workStartTime, isPresented: $showStartPicker)
-            TimeInputRow(title: "下班时间", value: $workEndTime, isPresented: $showEndPicker)
+            Picker("记录类型", selection: $selectedKind) {
+                ForEach(WorkLogKind.allCases) { kind in
+                    Text(kind.title).tag(kind)
+                }
+            }
+            .pickerStyle(.menu)
+
+            if selectedKind == .work {
+                TimeInputRow(title: "上班时间", value: $workStartTime, isPresented: $showStartPicker)
+                TimeInputRow(title: "下班时间", value: $workEndTime, isPresented: $showEndPicker)
+            } else if selectedKind == .custom {
+                TextField("输入自定义内容", text: $customNote)
+                    .textFieldStyle(.roundedBorder)
+            } else {
+                Text(selectedKind.title)
+                    .font(.body.weight(.medium))
+                    .foregroundStyle(.secondary)
+            }
 
             Spacer()
 
@@ -31,6 +53,7 @@ struct WorkTimeInputPanel: View {
                 Button("取消", action: onCancel)
                 Button("保存", action: onSave)
                     .keyboardShortcut(.defaultAction)
+                    .disabled(!canSave)
             }
         }
         .padding(20)
@@ -53,12 +76,9 @@ struct WorkDetailPanel: View {
             Divider()
 
             VStack(alignment: .leading, spacing: 6) {
-                Text(summary.timeRangeText)
-                Text(summary.workDurationText)
-                Text(summary.workHoursText)
-                Text(summary.declaredWorkHoursText)
-                Text(summary.overtimeText)
-                Text(summary.effectiveOvertimeText)
+                ForEach(summary.lines, id: \.self) { line in
+                    Text(line)
+                }
             }
             .font(.body)
 

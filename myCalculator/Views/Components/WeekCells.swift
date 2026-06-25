@@ -47,12 +47,9 @@ struct WeekDetailCell: View {
         Button(action: onTap) {
             VStack(alignment: .leading, spacing: 2) {
                 if let summary {
-                    Text(summary.timeRangeText)
-                    Text(summary.workDurationText)
-                    Text(summary.workHoursText)
-                    Text(summary.declaredWorkHoursText)
-                    Text(summary.overtimeText)
-                    Text(summary.effectiveOvertimeText)
+                    ForEach(summary.lines, id: \.self) { line in
+                        Text(line)
+                    }
                 } else {
                     Text("暂无记录")
                         .foregroundStyle(.secondary)

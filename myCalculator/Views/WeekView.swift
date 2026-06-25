@@ -5,6 +5,8 @@ struct WeekView: View {
     @Binding var daySchedules: [Date: WorkSchedule]
     @State private var selectedPanelDate: Date?
     @State private var isEditingTime = false
+    @State private var selectedKind: WorkLogKind = .work
+    @State private var customNote = ""
     @State private var workStartTime: Date = WeekView.makeTime(hour: 9, minute: 0)
     @State private var workEndTime: Date = WeekView.makeTime(hour: 18, minute: 0)
 
@@ -68,16 +70,13 @@ struct WeekView: View {
                 } else {
                     WorkTimeInputPanel(
                         targetDate: panelDate,
+                        selectedKind: $selectedKind,
+                        customNote: $customNote,
                         workStartTime: $workStartTime,
                         workEndTime: $workEndTime,
                         onSave: {
                             let key = normalizedDay(panelDate)
-                            daySchedules[key] = WorkSchedule(
-                                startHour: Calendar.current.component(.hour, from: workStartTime),
-                                startMinute: Calendar.current.component(.minute, from: workStartTime),
-                                endHour: Calendar.current.component(.hour, from: workEndTime),
-                                endMinute: Calendar.current.component(.minute, from: workEndTime)
-                            )
+                            daySchedules[key] = makeScheduleFromEditor()
                             WorkScheduleStore.save(daySchedules)
                             selectedPanelDate = nil
                         },
@@ -132,10 +131,19 @@ struct WeekView: View {
     private func openPanel(for targetDate: Date) {
         let key = normalizedDay(targetDate)
         if let schedule = daySchedules[key] {
-            workStartTime = WeekView.makeTime(hour: schedule.startHour, minute: schedule.startMinute)
-            workEndTime = WeekView.makeTime(hour: schedule.endHour, minute: schedule.endMinute)
+            selectedKind = schedule.kind
+            customNote = schedule.kind == .custom ? schedule.note : ""
+            if schedule.isWorkLog {
+                workStartTime = WeekView.makeTime(hour: schedule.startHour, minute: schedule.startMinute)
+                workEndTime = WeekView.makeTime(hour: schedule.endHour, minute: schedule.endMinute)
+            } else {
+                workStartTime = WeekView.makeTime(hour: 9, minute: 0)
+                workEndTime = WeekView.makeTime(hour: 18, minute: 0)
+            }
             isEditingTime = false
         } else {
+            selectedKind = .work
+            customNote = ""
             workStartTime = WeekView.makeTime(hour: 9, minute: 0)
             workEndTime = WeekView.makeTime(hour: 18, minute: 0)
             isEditingTime = true
@@ -152,5 +160,21 @@ struct WeekView: View {
         components.hour = hour
         components.minute = minute
         return Calendar.current.date(from: components) ?? Date()
+    }
+
+    private func makeScheduleFromEditor() -> WorkSchedule {
+        if selectedKind == .work {
+            return WorkSchedule(
+                startHour: Calendar.current.component(.hour, from: workStartTime),
+                startMinute: Calendar.current.component(.minute, from: workStartTime),
+                endHour: Calendar.current.component(.hour, from: workEndTime),
+                endMinute: Calendar.current.component(.minute, from: workEndTime)
+            )
+        }
+
+        return WorkSchedule(
+            kind: selectedKind,
+            note: selectedKind == .custom ? customNote.trimmingCharacters(in: .whitespacesAndNewlines) : ""
+        )
     }
 }

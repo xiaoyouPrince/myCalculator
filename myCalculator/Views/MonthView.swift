@@ -6,6 +6,8 @@ struct MonthView: View {
     private let weekDayTitles = ["一", "二", "三", "四", "五", "六", "日"]
     @State private var selectedPanelDate: Date?
     @State private var isEditingTime = false
+    @State private var selectedKind: WorkLogKind = .work
+    @State private var customNote = ""
     @State private var workStartTime: Date = MonthView.makeTime(hour: 9, minute: 0)
     @State private var workEndTime: Date = MonthView.makeTime(hour: 18, minute: 0)
 
@@ -71,16 +73,13 @@ struct MonthView: View {
                 } else {
                     WorkTimeInputPanel(
                         targetDate: panelDate,
+                        selectedKind: $selectedKind,
+                        customNote: $customNote,
                         workStartTime: $workStartTime,
                         workEndTime: $workEndTime,
                         onSave: {
                             let key = normalizedDay(panelDate)
-                            daySchedules[key] = WorkSchedule(
-                                startHour: Calendar.current.component(.hour, from: workStartTime),
-                                startMinute: Calendar.current.component(.minute, from: workStartTime),
-                                endHour: Calendar.current.component(.hour, from: workEndTime),
-                                endMinute: Calendar.current.component(.minute, from: workEndTime)
-                            )
+                            daySchedules[key] = makeScheduleFromEditor()
                             persistSchedules()
                             selectedPanelDate = nil
                         },
@@ -118,10 +117,19 @@ struct MonthView: View {
     private func openPanel(for targetDate: Date) {
         let key = normalizedDay(targetDate)
         if let schedule = daySchedules[key] {
-            workStartTime = MonthView.makeTime(hour: schedule.startHour, minute: schedule.startMinute)
-            workEndTime = MonthView.makeTime(hour: schedule.endHour, minute: schedule.endMinute)
+            selectedKind = schedule.kind
+            customNote = schedule.kind == .custom ? schedule.note : ""
+            if schedule.isWorkLog {
+                workStartTime = MonthView.makeTime(hour: schedule.startHour, minute: schedule.startMinute)
+                workEndTime = MonthView.makeTime(hour: schedule.endHour, minute: schedule.endMinute)
+            } else {
+                workStartTime = MonthView.makeTime(hour: 9, minute: 0)
+                workEndTime = MonthView.makeTime(hour: 18, minute: 0)
+            }
             isEditingTime = false
         } else {
+            selectedKind = .work
+            customNote = ""
             workStartTime = MonthView.makeTime(hour: 9, minute: 0)
             workEndTime = MonthView.makeTime(hour: 18, minute: 0)
             isEditingTime = true
@@ -213,6 +221,22 @@ struct MonthView: View {
         let estimated = (usableHeight - 32) / rows
         return min(148, max(88, estimated))
     }
+
+    private func makeScheduleFromEditor() -> WorkSchedule {
+        if selectedKind == .work {
+            return WorkSchedule(
+                startHour: Calendar.current.component(.hour, from: workStartTime),
+                startMinute: Calendar.current.component(.minute, from: workStartTime),
+                endHour: Calendar.current.component(.hour, from: workEndTime),
+                endMinute: Calendar.current.component(.minute, from: workEndTime)
+            )
+        }
+
+        return WorkSchedule(
+            kind: selectedKind,
+            note: selectedKind == .custom ? customNote.trimmingCharacters(in: .whitespacesAndNewlines) : ""
+        )
+    }
 }
 
 struct MonthHeaderCell: View {
@@ -263,15 +287,12 @@ struct MonthDayCell: View {
 
                 if let summary = scheduleSummary {
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(summary.timeRangeText)
-                        Text(summary.workDurationText)
-                        Text(summary.workHoursText)
-                        Text(summary.declaredWorkHoursText)
-                        Text(summary.overtimeText)
-                        Text(summary.effectiveOvertimeText)
+                        ForEach(summary.lines, id: \.self) { line in
+                            Text(line)
+                        }
                     }
                     .font(.caption2)
-                    .foregroundStyle(.blue)
+                    .foregroundStyle(summary.isWorkLog ? .blue : .secondary)
                     .lineLimit(1)
                     .padding(.horizontal, 8)
                 }

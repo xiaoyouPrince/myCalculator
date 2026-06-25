@@ -4,6 +4,8 @@ struct DayView: View {
     @Binding var date: Date
     @Binding var daySchedules: [Date: WorkSchedule]
     @State private var showEditPanel = false
+    @State private var selectedKind: WorkLogKind = .work
+    @State private var customNote = ""
     @State private var workStartTime: Date = DayView.makeTime(hour: 9, minute: 0)
     @State private var workEndTime: Date = DayView.makeTime(hour: 18, minute: 0)
 
@@ -26,12 +28,9 @@ struct DayView: View {
 
             if let summary = selectedDaySummary {
                 VStack(alignment: .leading, spacing: 8) {
-                    Text(summary.timeRangeText)
-                    Text(summary.workDurationText)
-                    Text(summary.workHoursText)
-                    Text(summary.declaredWorkHoursText)
-                    Text(summary.overtimeText)
-                    Text(summary.effectiveOvertimeText)
+                    ForEach(summary.lines, id: \.self) { line in
+                        Text(line)
+                    }
                 }
                 .font(.body)
             } else {
@@ -45,16 +44,13 @@ struct DayView: View {
         .sheet(isPresented: $showEditPanel) {
             WorkTimeInputPanel(
                 targetDate: normalizedDay(date),
+                selectedKind: $selectedKind,
+                customNote: $customNote,
                 workStartTime: $workStartTime,
                 workEndTime: $workEndTime,
                 onSave: {
                     let key = normalizedDay(date)
-                    daySchedules[key] = WorkSchedule(
-                        startHour: Calendar.current.component(.hour, from: workStartTime),
-                        startMinute: Calendar.current.component(.minute, from: workStartTime),
-                        endHour: Calendar.current.component(.hour, from: workEndTime),
-                        endMinute: Calendar.current.component(.minute, from: workEndTime)
-                    )
+                    daySchedules[key] = makeScheduleFromEditor()
                     WorkScheduleStore.save(daySchedules)
                     showEditPanel = false
                 },
@@ -75,9 +71,18 @@ struct DayView: View {
     private func prepareEditor() {
         let key = normalizedDay(date)
         if let schedule = daySchedules[key] {
-            workStartTime = DayView.makeTime(hour: schedule.startHour, minute: schedule.startMinute)
-            workEndTime = DayView.makeTime(hour: schedule.endHour, minute: schedule.endMinute)
+            selectedKind = schedule.kind
+            customNote = schedule.kind == .custom ? schedule.note : ""
+            if schedule.isWorkLog {
+                workStartTime = DayView.makeTime(hour: schedule.startHour, minute: schedule.startMinute)
+                workEndTime = DayView.makeTime(hour: schedule.endHour, minute: schedule.endMinute)
+            } else {
+                workStartTime = DayView.makeTime(hour: 9, minute: 0)
+                workEndTime = DayView.makeTime(hour: 18, minute: 0)
+            }
         } else {
+            selectedKind = .work
+            customNote = ""
             workStartTime = DayView.makeTime(hour: 9, minute: 0)
             workEndTime = DayView.makeTime(hour: 18, minute: 0)
         }
@@ -92,5 +97,21 @@ struct DayView: View {
         components.hour = hour
         components.minute = minute
         return Calendar.current.date(from: components) ?? Date()
+    }
+
+    private func makeScheduleFromEditor() -> WorkSchedule {
+        if selectedKind == .work {
+            return WorkSchedule(
+                startHour: Calendar.current.component(.hour, from: workStartTime),
+                startMinute: Calendar.current.component(.minute, from: workStartTime),
+                endHour: Calendar.current.component(.hour, from: workEndTime),
+                endMinute: Calendar.current.component(.minute, from: workEndTime)
+            )
+        }
+
+        return WorkSchedule(
+            kind: selectedKind,
+            note: selectedKind == .custom ? customNote.trimmingCharacters(in: .whitespacesAndNewlines) : ""
+        )
     }
 }

@@ -7,6 +7,30 @@
 
 import SwiftUI
 import AppKit
+import UniformTypeIdentifiers
+
+struct CSVExportDocument: FileDocument {
+    static var readableContentTypes: [UTType] { [.commaSeparatedText] }
+
+    var content: String
+
+    init(content: String = "") {
+        self.content = content
+    }
+
+    init(configuration: ReadConfiguration) throws {
+        if let data = configuration.file.regularFileContents,
+           let text = String(data: data, encoding: .utf8) {
+            content = text
+        } else {
+            content = ""
+        }
+    }
+
+    func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
+        FileWrapper(regularFileWithContents: Data(content.utf8))
+    }
+}
 
 struct ContentView: View {
     enum CalendarMode: String, CaseIterable, Identifiable {
@@ -21,13 +45,16 @@ struct ContentView: View {
     @State private var selectedMode: CalendarMode = .month
     @State private var selectedDate: Date = .now
     @State private var daySchedules: [Date: WorkSchedule] = [:]
+    @State private var exportDocument = CSVExportDocument()
+    @State private var isExportingCSV = false
 
     var body: some View {
         NavigationSplitView {
             SidebarView(
                 selectedDate: $selectedDate,
                 daySchedules: $daySchedules,
-                onOpenJSONFile: openPersistedJSONFile
+                onOpenJSONFile: openPersistedJSONFile,
+                onExportCSV: exportSchedulesCSV
             )
             .frame(minWidth: 260)
             .navigationSplitViewColumnWidth(min: 260, ideal: 300, max: 340)
@@ -44,6 +71,12 @@ struct ContentView: View {
         .onAppear {
             daySchedules = WorkScheduleStore.load()
         }
+        .fileExporter(
+            isPresented: $isExportingCSV,
+            document: exportDocument,
+            contentType: .commaSeparatedText,
+            defaultFilename: "work-schedules"
+        ) { _ in }
     }
 
     private func openPersistedJSONFile() {
@@ -52,6 +85,11 @@ struct ContentView: View {
             WorkScheduleStore.save([:])
         }
         NSWorkspace.shared.open(fileURL)
+    }
+
+    private func exportSchedulesCSV() {
+        exportDocument = CSVExportDocument(content: WorkScheduleStore.exportCSV(from: daySchedules))
+        isExportingCSV = true
     }
 
     private var toolbar: some View {

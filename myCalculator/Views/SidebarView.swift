@@ -4,7 +4,8 @@ struct SidebarView: View {
     @Binding var selectedDate: Date
     @Binding var daySchedules: [Date: WorkSchedule]
     let onOpenJSONFile: () -> Void
-    private let bottomOverlayHeight: CGFloat = 72
+    let onExportCSV: () -> Void
+    private let bottomOverlayHeight: CGFloat = 108
 
     var body: some View {
         GeometryReader { proxy in
@@ -20,12 +21,9 @@ struct SidebarView: View {
 
                         VStack(alignment: .leading, spacing: 10) {
                             if let summary = selectedDaySummary {
-                                Text(summary.timeRangeText)
-                                Text(summary.workDurationText)
-                                Text(summary.workHoursText)
-                                Text(summary.declaredWorkHoursText)
-                                Text(summary.overtimeText)
-                                Text(summary.effectiveOvertimeText)
+                                ForEach(summary.lines, id: \.self) { line in
+                                    Text(line)
+                                }
                             } else {
                                 Text("当日暂无记录")
                                     .foregroundStyle(.secondary)
@@ -38,7 +36,7 @@ struct SidebarView: View {
 
                         VStack(alignment: .leading, spacing: 8) {
                             if let summary = selectedWeekSummary {
-                                Text("录入天数 \(summary.recordedDays) 天")
+                                Text("记录天数 \(summary.recordedDays) 天")
                                 Text("周工作时长 \(String(format: "%.2f", summary.workHours)) 小时")
                                 Text("周工时申报 \(String(format: "%.2f", summary.declaredWorkHours)) 小时")
                                 Text("周加班时长 \(String(format: "%.2f", summary.overtimeHours)) 小时")
@@ -55,7 +53,7 @@ struct SidebarView: View {
 
                         VStack(alignment: .leading, spacing: 8) {
                             if let summary = selectedMonthSummary {
-                                Text("录入天数 \(summary.recordedDays) 天")
+                                Text("记录天数 \(summary.recordedDays) 天")
                                 Text("月工作时长 \(String(format: "%.2f", summary.workHours)) 小时")
                                 Text("月工时申报 \(String(format: "%.2f", summary.declaredWorkHours)) 小时")
                                 Text("月加班时长 \(String(format: "%.2f", summary.overtimeHours)) 小时")
@@ -81,12 +79,20 @@ struct SidebarView: View {
                         .fill(.clear)
                         .frame(height: bottomOverlayHeight - 1)
                         .overlay {
-                            Button(action: onOpenJSONFile) {
-                                Label("查看 JSON", systemImage: "doc.text.magnifyingglass")
-                                    .frame(maxWidth: .infinity)
+                            VStack(spacing: 8) {
+                                Button(action: onExportCSV) {
+                                    Label("导出 CSV", systemImage: "square.and.arrow.down")
+                                        .frame(maxWidth: .infinity)
+                                }
+                                .buttonStyle(.borderedProminent)
+                                .tint(Color(nsColor: .controlAccentColor))
+
+                                Button(action: onOpenJSONFile) {
+                                    Label("查看 JSON", systemImage: "doc.text.magnifyingglass")
+                                        .frame(maxWidth: .infinity)
+                                }
+                                .buttonStyle(.bordered)
                             }
-                            .buttonStyle(.borderedProminent)
-                            .tint(Color(nsColor: .controlAccentColor))
                             .padding(.horizontal, 16)
                         }
                 }
