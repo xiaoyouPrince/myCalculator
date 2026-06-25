@@ -90,18 +90,48 @@ struct ContentView: View {
         NSWorkspace.shared.open(fileURL)
     }
 
-    private func exportSchedulesCSV() {
-        exportDocument = TextExportDocument(content: WorkScheduleStore.exportCSV(from: daySchedules))
+    private func exportSchedulesCSV(scope: ScheduleExportScope) {
+        let schedules = schedulesForExport(scope: scope)
+        exportDocument = TextExportDocument(content: WorkScheduleStore.exportCSV(from: schedules))
         exportContentType = .commaSeparatedText
-        exportFilename = "work-schedules"
+        exportFilename = exportFilename(prefix: "work-schedules", scope: scope)
         isExporting = true
     }
 
-    private func exportMinimalSchedulesJSON() {
-        exportDocument = TextExportDocument(content: WorkScheduleStore.exportMinimalJSON(from: daySchedules))
+    private func exportMinimalSchedulesJSON(scope: ScheduleExportScope) {
+        let schedules = schedulesForExport(scope: scope)
+        exportDocument = TextExportDocument(content: WorkScheduleStore.exportMinimalJSON(from: schedules))
         exportContentType = .json
-        exportFilename = "work-schedules-minimal"
+        exportFilename = exportFilename(prefix: "work-schedules-minimal", scope: scope)
         isExporting = true
+    }
+
+    private func schedulesForExport(scope: ScheduleExportScope) -> [Date: WorkSchedule] {
+        switch scope {
+        case .allHistory:
+            return daySchedules
+        case .currentMonth:
+            let calendar = Calendar.current
+            let selectedYear = calendar.component(.year, from: selectedDate)
+            let selectedMonth = calendar.component(.month, from: selectedDate)
+            return daySchedules.filter { date, _ in
+                let normalized = calendar.startOfDay(for: date)
+                return calendar.component(.year, from: normalized) == selectedYear &&
+                    calendar.component(.month, from: normalized) == selectedMonth
+            }
+        }
+    }
+
+    private func exportFilename(prefix: String, scope: ScheduleExportScope) -> String {
+        switch scope {
+        case .allHistory:
+            return "\(prefix)-all"
+        case .currentMonth:
+            let formatter = DateFormatter()
+            formatter.locale = Locale(identifier: "en_US_POSIX")
+            formatter.dateFormat = "yyyy-MM"
+            return "\(prefix)-\(formatter.string(from: selectedDate))"
+        }
     }
 
     private var toolbar: some View {

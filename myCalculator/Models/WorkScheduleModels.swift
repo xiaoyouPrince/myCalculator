@@ -12,6 +12,20 @@ struct MonthWeek {
     let days: [MonthDay]
 }
 
+enum ScheduleExportScope {
+    case allHistory
+    case currentMonth
+
+    var title: String {
+        switch self {
+        case .allHistory:
+            return "全部历史"
+        case .currentMonth:
+            return "仅当月"
+        }
+    }
+}
+
 enum WorkLogKind: String, Codable, CaseIterable, Identifiable {
     case work
     case holiday

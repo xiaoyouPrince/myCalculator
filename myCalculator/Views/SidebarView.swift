@@ -4,9 +4,12 @@ struct SidebarView: View {
     @Binding var selectedDate: Date
     @Binding var daySchedules: [Date: WorkSchedule]
     let onOpenJSONFile: () -> Void
-    let onExportCSV: () -> Void
-    let onExportMinimalJSON: () -> Void
+    let onExportCSV: (ScheduleExportScope) -> Void
+    let onExportMinimalJSON: (ScheduleExportScope) -> Void
     private let bottomOverlayHeight: CGFloat = 148
+    private let bottomHorizontalPadding: CGFloat = 32
+    @State private var isShowingCSVScopePicker = false
+    @State private var isShowingMinimalJSONScopePicker = false
 
     var body: some View {
         GeometryReader { proxy in
@@ -77,30 +80,46 @@ struct SidebarView: View {
                 VStack(spacing: 0) {
                     Divider()
                     Rectangle()
-                        .fill(.clear)
+                        .fill(Color(nsColor: .windowBackgroundColor))
                         .frame(height: bottomOverlayHeight - 1)
                         .overlay {
                             VStack(spacing: 8) {
-                                Button(action: onExportCSV) {
-                                    Label("导出 CSV", systemImage: "square.and.arrow.down")
-                                        .frame(maxWidth: .infinity)
+                                Button {
+                                    isShowingCSVScopePicker.toggle()
+                                } label: {
+                                    exportButtonLabel(title: "导出 CSV", systemImage: "square.and.arrow.down", showsChevron: true)
                                 }
                                 .buttonStyle(.borderedProminent)
                                 .tint(Color(nsColor: .controlAccentColor))
+                                .frame(maxWidth: .infinity)
+                                .popover(isPresented: $isShowingCSVScopePicker, arrowEdge: .bottom) {
+                                    exportScopePicker { scope in
+                                        isShowingCSVScopePicker = false
+                                        onExportCSV(scope)
+                                    }
+                                }
 
-                                Button(action: onExportMinimalJSON) {
-                                    Label("导出极简 JSON", systemImage: "arrow.down.doc")
-                                        .frame(maxWidth: .infinity)
+                                Button {
+                                    isShowingMinimalJSONScopePicker.toggle()
+                                } label: {
+                                    exportButtonLabel(title: "导出极简 JSON", systemImage: "arrow.down.doc", showsChevron: true)
                                 }
                                 .buttonStyle(.bordered)
+                                .frame(maxWidth: .infinity)
+                                .popover(isPresented: $isShowingMinimalJSONScopePicker, arrowEdge: .bottom) {
+                                    exportScopePicker { scope in
+                                        isShowingMinimalJSONScopePicker = false
+                                        onExportMinimalJSON(scope)
+                                    }
+                                }
 
                                 Button(action: onOpenJSONFile) {
-                                    Label("查看 JSON", systemImage: "doc.text.magnifyingglass")
-                                        .frame(maxWidth: .infinity)
+                                    exportButtonLabel(title: "查看 JSON", systemImage: "doc.text.magnifyingglass", showsChevron: false)
                                 }
                                 .buttonStyle(.bordered)
+                                .frame(maxWidth: .infinity)
                             }
-                            .padding(.horizontal, 16)
+                            .padding(.horizontal, bottomHorizontalPadding)
                         }
                 }
                 .frame(maxWidth: .infinity)
@@ -119,6 +138,35 @@ struct SidebarView: View {
                 endPoint: .bottom
             )
         )
+    }
+
+    private func exportButtonLabel(title: String, systemImage: String, showsChevron: Bool) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: systemImage)
+            Text(title)
+            Spacer()
+            Image(systemName: "chevron.down")
+                .font(.caption.weight(.semibold))
+                .opacity(showsChevron ? 1 : 0)
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    private func exportScopePicker(onSelect: @escaping (ScheduleExportScope) -> Void) -> some View {
+        VStack(spacing: 6) {
+            Button(ScheduleExportScope.allHistory.title) {
+                onSelect(.allHistory)
+            }
+            .frame(maxWidth: .infinity)
+
+            Button(ScheduleExportScope.currentMonth.title) {
+                onSelect(.currentMonth)
+            }
+            .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(.bordered)
+        .padding(10)
+        .frame(width: 160)
     }
 
     @ViewBuilder
