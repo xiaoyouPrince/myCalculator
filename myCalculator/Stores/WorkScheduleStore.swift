@@ -32,10 +32,8 @@ enum WorkScheduleStore {
         let records = schedules.map { date, value in
             WorkScheduleRecord(
                 day: dayKey(from: date),
-                startHour: value.startHour,
-                startMinute: value.startMinute,
-                endHour: value.endHour,
-                endMinute: value.endMinute,
+                startTime: timeText(hour: value.startHour, minute: value.startMinute),
+                endTime: timeText(hour: value.endHour, minute: value.endMinute),
                 kind: value.kind,
                 note: value.note
             )

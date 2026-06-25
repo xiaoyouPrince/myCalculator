@@ -224,10 +224,92 @@ struct WeekDayDetail: Identifiable {
 
 struct WorkScheduleRecord: Codable {
     let day: String
-    let startHour: Int
-    let startMinute: Int
-    let endHour: Int
-    let endMinute: Int
+    let startTime: String
+    let endTime: String
     let kind: WorkLogKind?
     let note: String?
+
+    var startHour: Int {
+        WorkScheduleRecord.timeParts(from: startTime).hour
+    }
+
+    var startMinute: Int {
+        WorkScheduleRecord.timeParts(from: startTime).minute
+    }
+
+    var endHour: Int {
+        WorkScheduleRecord.timeParts(from: endTime).hour
+    }
+
+    var endMinute: Int {
+        WorkScheduleRecord.timeParts(from: endTime).minute
+    }
+
+    init(day: String, startHour: Int, startMinute: Int, endHour: Int, endMinute: Int, kind: WorkLogKind?, note: String?) {
+        self.day = day
+        self.startTime = WorkScheduleRecord.timeText(hour: startHour, minute: startMinute)
+        self.endTime = WorkScheduleRecord.timeText(hour: endHour, minute: endMinute)
+        self.kind = kind
+        self.note = note
+    }
+
+    init(day: String, startTime: String, endTime: String, kind: WorkLogKind?, note: String?) {
+        self.day = day
+        self.startTime = startTime
+        self.endTime = endTime
+        self.kind = kind
+        self.note = note
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case day
+        case startTime
+        case endTime
+        case startHour
+        case startMinute
+        case endHour
+        case endMinute
+        case kind
+        case note
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        day = try container.decode(String.self, forKey: .day)
+        kind = try container.decodeIfPresent(WorkLogKind.self, forKey: .kind)
+        note = try container.decodeIfPresent(String.self, forKey: .note)
+
+        let decodedStartTime = try container.decodeIfPresent(String.self, forKey: .startTime)
+        let decodedEndTime = try container.decodeIfPresent(String.self, forKey: .endTime)
+        if let decodedStartTime, let decodedEndTime {
+            startTime = decodedStartTime
+            endTime = decodedEndTime
+        } else {
+            let legacyStartHour = try container.decodeIfPresent(Int.self, forKey: .startHour) ?? 0
+            let legacyStartMinute = try container.decodeIfPresent(Int.self, forKey: .startMinute) ?? 0
+            let legacyEndHour = try container.decodeIfPresent(Int.self, forKey: .endHour) ?? 0
+            let legacyEndMinute = try container.decodeIfPresent(Int.self, forKey: .endMinute) ?? 0
+            startTime = WorkScheduleRecord.timeText(hour: legacyStartHour, minute: legacyStartMinute)
+            endTime = WorkScheduleRecord.timeText(hour: legacyEndHour, minute: legacyEndMinute)
+        }
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(day, forKey: .day)
+        try container.encode(startTime, forKey: .startTime)
+        try container.encode(endTime, forKey: .endTime)
+        try container.encodeIfPresent(kind, forKey: .kind)
+        try container.encodeIfPresent(note, forKey: .note)
+    }
+
+    private static func timeText(hour: Int, minute: Int) -> String {
+        String(format: "%02d:%02d", hour, minute)
+    }
+
+    private static func timeParts(from text: String) -> (hour: Int, minute: Int) {
+        let parts = text.split(separator: ":", maxSplits: 1).compactMap { Int($0) }
+        guard parts.count == 2 else { return (0, 0) }
+        return (parts[0], parts[1])
+    }
 }
