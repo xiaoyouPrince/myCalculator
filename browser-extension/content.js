@@ -373,13 +373,21 @@ function formatFillValue(record, options) {
   if (options.fillMode === "range") {
     return `${record.startTime}-${record.endTime}`;
   }
-  return workHours(record.startTime, record.endTime).toFixed(options.precision === 1 ? 1 : 2);
+  return workMetrics(record).declaredWorkHours.toFixed(options.precision === 2 ? 2 : 1);
 }
 
-function workHours(startTime, endTime) {
-  const start = minutesFromTime(startTime);
-  const end = minutesFromTime(endTime);
-  return Math.max(0, end - start) / 60;
+function workMetrics(record) {
+  const workMinutes = Math.max(0, minutesFromTime(record.endTime) - minutesFromTime(record.startTime));
+  const workHours = workMinutes / 60;
+  let declaredWorkHours = workHours;
+  if (workHours < 10.0) {
+    declaredWorkHours = Math.max(0, workHours - 1.0);
+  } else if (workHours > 10.0) {
+    declaredWorkHours = Math.max(0, workHours - 2.0);
+  }
+  const overtimeHours = Math.max(0, workHours - 10.0);
+  const effectiveOvertimeHours = overtimeHours < 1.0 ? 0.0 : Math.floor(overtimeHours * 2.0) / 2.0;
+  return { workMinutes, declaredWorkHours, overtimeHours, effectiveOvertimeHours };
 }
 
 function minutesFromTime(text) {

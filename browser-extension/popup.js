@@ -59,8 +59,11 @@ autofillButton.addEventListener("click", async () => {
       options
     });
     const result = contentResult.failed ? await autofillInMainWorld(tab.id, records, options) : contentResult;
+    const summaryRecords = recordsForSummary(records, result);
+    const summary = monthlySummary(summaryRecords, precisionValue(options));
     const failedText = result.failed ? `，写入失败 ${result.failed} 项` : "";
-    showMessage(`已确认写入 ${result.filled} 项，跳过 ${result.skipped} 项${failedText}`, result.failed ? "error" : "ok");
+    const summaryText = `记录天数 ${summary.recordedDays} 天，月工作时长 ${summary.workHours} 小时，月工时申报 ${summary.declaredWorkHours} 小时，月加班时长 ${summary.overtimeHours} 小时，月有效加班 ${summary.effectiveOvertimeHours} 小时`;
+    showMessage(`已确认写入 ${result.filled} 项，跳过 ${result.skipped} 项${failedText}。${summaryText}`, result.failed ? "error" : "ok");
     if (result.details?.length) {
       diagnoseOutput.value = JSON.stringify(result.details, null, 2);
     }
@@ -118,6 +121,73 @@ function normalizeRecords(value) {
 
 function renderStatus(records) {
   dataStatus.textContent = records.length ? `当前已导入 ${records.length} 条工作记录` : "未导入数据";
+}
+
+function recordsForSummary(records, result) {
+  const successfulDays = new Set((result.details ?? [])
+    .filter((detail) => detail.ok)
+    .map((detail) => detail.day));
+  if (successfulDays.size) {
+    return records.filter((record) => successfulDays.has(record.day));
+  }
+  return records;
+}
+
+function monthlySummary(records, precisionDigits) {
+  const metrics = records.map(workMetrics);
+  const totals = metrics.reduce((result, metric) => ({
+    workMinutes: result.workMinutes + metric.workMinutes,
+    declaredWorkHours: result.declaredWorkHours + metric.declaredWorkHours,
+    overtimeHours: result.overtimeHours + metric.overtimeHours,
+    effectiveOvertimeHours: result.effectiveOvertimeHours + metric.effectiveOvertimeHours
+  }), {
+    workMinutes: 0,
+    declaredWorkHours: 0,
+    overtimeHours: 0,
+    effectiveOvertimeHours: 0
+  });
+
+  return {
+    recordedDays: records.length,
+    workHours: formatNumber(totals.workMinutes / 60, precisionDigits),
+    declaredWorkHours: formatNumber(totals.declaredWorkHours, precisionDigits),
+    overtimeHours: formatNumber(totals.overtimeHours, precisionDigits),
+    effectiveOvertimeHours: formatNumber(totals.effectiveOvertimeHours, precisionDigits)
+  };
+}
+
+function workMetrics(record) {
+  const workMinutes = Math.max(0, minutesFromTime(record.endTime) - minutesFromTime(record.startTime));
+  const workHours = workMinutes / 60;
+  let declaredWorkHours = workHours;
+  if (workHours < 10.0) {
+    declaredWorkHours = Math.max(0, workHours - 1.0);
+  } else if (workHours > 10.0) {
+    declaredWorkHours = Math.max(0, workHours - 2.0);
+  }
+  const overtimeHours = Math.max(0, workHours - 10.0);
+  const effectiveOvertimeHours = overtimeHours < 1.0 ? 0.0 : Math.floor(overtimeHours * 2.0) / 2.0;
+  return { workMinutes, declaredWorkHours, overtimeHours, effectiveOvertimeHours };
+}
+
+function formatFillValue(record, options) {
+  if (options.fillMode === "range") {
+    return `${record.startTime}-${record.endTime}`;
+  }
+  return formatNumber(workMetrics(record).declaredWorkHours, precisionValue(options));
+}
+
+function precisionValue(options) {
+  return options.precision === 2 ? 2 : 1;
+}
+
+function formatNumber(value, precisionDigits) {
+  return value.toFixed(precisionDigits);
+}
+
+function minutesFromTime(text) {
+  const [hour, minute] = text.split(":").map(Number);
+  return hour * 60 + minute;
 }
 
 async function ensureContentScript(tabId) {
@@ -294,13 +364,21 @@ function mainWorldAutofill(records, options) {
     if (fillOptions.fillMode === "range") {
       return `${record.startTime}-${record.endTime}`;
     }
-    return workHours(record.startTime, record.endTime).toFixed(fillOptions.precision === 1 ? 1 : 2);
+    return workMetrics(record).declaredWorkHours.toFixed(fillOptions.precision === 2 ? 2 : 1);
   }
 
-  function workHours(startTime, endTime) {
-    const start = minutesFromTime(startTime);
-    const end = minutesFromTime(endTime);
-    return Math.max(0, end - start) / 60;
+  function workMetrics(record) {
+    const workMinutes = Math.max(0, minutesFromTime(record.endTime) - minutesFromTime(record.startTime));
+    const workHours = workMinutes / 60;
+    let declaredWorkHours = workHours;
+    if (workHours < 10.0) {
+      declaredWorkHours = Math.max(0, workHours - 1.0);
+    } else if (workHours > 10.0) {
+      declaredWorkHours = Math.max(0, workHours - 2.0);
+    }
+    const overtimeHours = Math.max(0, workHours - 10.0);
+    const effectiveOvertimeHours = overtimeHours < 1.0 ? 0.0 : Math.floor(overtimeHours * 2.0) / 2.0;
+    return { workMinutes, declaredWorkHours, overtimeHours, effectiveOvertimeHours };
   }
 
   function minutesFromTime(text) {
