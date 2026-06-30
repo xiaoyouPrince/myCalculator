@@ -19,6 +19,12 @@
 - `myCalculator/Models/WorkScheduleModels.swift`：数据模型与工时计算模型
 - `myCalculator/Stores/WorkScheduleStore.swift`：JSON 持久化读写
 - `myCalculator/Assets.xcassets`：图标与资源
+- `docs/`：项目文档、工程复盘和技术文章
+  - `help-index.md`：App Help 菜单文档目录
+  - `browser-extension-autofill.md`：浏览器扩展自动填报说明
+  - `month-view-rendering-postmortem.md`：月视图跨月渲染问题复盘
+  - `swiftui-uikit-mental-models.md`：SwiftUI 与 UIKit 心智模型技术文章
+- `browser-extension/`：浏览器自动填报扩展源码与说明
 
 ## 2. 已实现功能
 
@@ -111,7 +117,7 @@
 
 ### 2.3 左侧栏信息
 
-- 选择日期（纵向标签，窗口较低时自动切换为紧凑日期选择器）
+- 选择日期（固定图形日历，避免紧凑输入框误解析年份）
 - 当日数据
 - 当周汇总（含周标题）
 - 当月汇总（含月标题）
@@ -129,6 +135,33 @@
 - 存储格式：JSON
 - 存储位置：`Application Support/myCalculator/work-schedules.json`（用户域）
 - 启动时自动加载，保存后实时刷新 UI
+
+### 2.6 导出与浏览器扩展
+
+- 支持导出 CSV：
+  - 可导出全部历史
+  - 可导出当前月
+  - 包含日期、类型、内容、上下班时间、工作时长、工时申报、加班和有效加班
+- 支持导出极简 JSON：
+  - 仅导出工作记录
+  - 面向 `browser-extension` 自动填报扩展
+  - 格式为 `day`、`startTime`、`endTime`
+- 浏览器扩展支持：
+  - 导入极简 JSON
+  - 按工作小时数或上下班时间段填写
+  - 输出填报诊断信息
+  - 显示本次填报数据的月度汇总
+
+### 2.7 App 内帮助文档
+
+Help 菜单下已整理项目内文档：
+
+- `帮助文档目录`
+- `项目说明`
+- `工时计算规则`
+- `浏览器扩展自动填报`
+- `问题复盘：月视图跨月渲染`
+- `SwiftUI 与 UIKit 心智模型`
 
 ## 3. 开发环境与版本建议
 
@@ -165,8 +198,30 @@ xcodebuild -project "myCalculator.xcodeproj" -scheme "myCalculator" -sdk macosx 
 - 增加输入校验（如下班时间不得早于上班时间）
 - 增加导出、清空、备份与恢复
 - 增加年度统计与图表展示
+- 为核心日期与工时计算补充自动化测试
+- 将 App 与浏览器扩展共享的工时规则抽出为更明确的规格文档
+- 继续沉淀复杂问题复盘，并同步到 Help 菜单
 
 ## 6. 变更日志
+
+### 2026-06-30
+
+- 修复月视图跨月日期渲染问题：
+  - 当前展示月份日期使用正常深色
+  - 非当前展示月份日期淡化显示
+  - 非当前展示月份的“今天”不再高亮
+  - 月份切换时通过月份级 identity 避免 `LazyVGrid` 复用旧状态
+- 固定左侧日期选择器为图形日历，避免 compact 日期输入框误解析年份
+- 增加项目内工程复盘文档：
+  - `docs/month-view-rendering-postmortem.md`
+  - `docs/swiftui-uikit-mental-models.md`
+- 增加 Help 菜单文档体系：
+  - 帮助文档目录
+  - 项目说明
+  - 工时计算规则
+  - 浏览器扩展自动填报
+  - 月视图问题复盘
+  - SwiftUI/UIKit 技术文章
 
 ### 2026-04-09
 

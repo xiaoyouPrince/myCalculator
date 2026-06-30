@@ -19,14 +19,38 @@ struct myCalculatorApp: App {
             AppHelpCommands()
         }
 
+        Window("帮助文档目录", id: "helpIndex") {
+            MarkdownHelpView(markdown: MarkdownDocumentContent.load(resource: "help-index", missingMessage: "未找到帮助文档目录。"))
+                .frame(minWidth: 720, minHeight: 560)
+        }
+        .defaultSize(width: 820, height: 680)
+
+        Window("项目说明", id: "projectReadme") {
+            MarkdownHelpView(markdown: MarkdownDocumentContent.load(resource: "README", missingMessage: "未找到项目说明 README.md。"))
+                .frame(minWidth: 720, minHeight: 560)
+        }
+        .defaultSize(width: 820, height: 680)
+
         Window("工时计算规则", id: "workRulesHelp") {
             MarkdownHelpView(markdown: WorkRulesHelpContent.load())
                 .frame(minWidth: 720, minHeight: 560)
         }
         .defaultSize(width: 820, height: 680)
 
+        Window("浏览器扩展自动填报", id: "browserExtensionAutofill") {
+            MarkdownHelpView(markdown: MarkdownDocumentContent.load(resource: "browser-extension-autofill", missingMessage: "未找到浏览器扩展自动填报说明。"))
+                .frame(minWidth: 720, minHeight: 560)
+        }
+        .defaultSize(width: 820, height: 680)
+
+        Window("问题复盘：月视图跨月渲染", id: "monthViewRenderingPostmortem") {
+            MarkdownHelpView(markdown: MarkdownDocumentContent.load(resource: "month-view-rendering-postmortem", missingMessage: "未找到月视图渲染问题复盘。"))
+                .frame(minWidth: 720, minHeight: 560)
+        }
+        .defaultSize(width: 820, height: 680)
+
         Window("SwiftUI 与 UIKit 心智模型", id: "swiftUIUIKitMentalModels") {
-            MarkdownHelpView(markdown: SwiftUIUIKitMentalModelsContent.load())
+            MarkdownHelpView(markdown: MarkdownDocumentContent.load(resource: "swiftui-uikit-mental-models", missingMessage: "未找到 SwiftUI 与 UIKit 心智模型文档。"))
                 .frame(minWidth: 720, minHeight: 560)
         }
         .defaultSize(width: 820, height: 680)
@@ -38,10 +62,30 @@ private struct AppHelpCommands: Commands {
 
     var body: some Commands {
         CommandGroup(replacing: .help) {
+            Button("帮助文档目录") {
+                openWindow(id: "helpIndex")
+            }
+
+            Divider()
+
+            Button("项目说明") {
+                openWindow(id: "projectReadme")
+            }
+
             Button("工时计算规则") {
                 openWindow(id: "workRulesHelp")
             }
             .keyboardShortcut("?", modifiers: [.command])
+
+            Button("浏览器扩展自动填报") {
+                openWindow(id: "browserExtensionAutofill")
+            }
+
+            Divider()
+
+            Button("问题复盘：月视图跨月渲染") {
+                openWindow(id: "monthViewRenderingPostmortem")
+            }
 
             Button("SwiftUI 与 UIKit 心智模型") {
                 openWindow(id: "swiftUIUIKitMentalModels")
@@ -70,12 +114,12 @@ private struct MarkdownHelpView: View {
     }
 }
 
-private enum SwiftUIUIKitMentalModelsContent {
-    static func load() -> String {
-        guard let url = Bundle.main.url(forResource: "swiftui-uikit-mental-models", withExtension: "md"),
+private enum MarkdownDocumentContent {
+    static func load(resource: String, missingMessage: String) -> String {
+        guard let url = Bundle.main.url(forResource: resource, withExtension: "md"),
               let content = try? String(contentsOf: url, encoding: .utf8)
         else {
-            return "未找到 SwiftUI 与 UIKit 心智模型文档。"
+            return missingMessage
         }
 
         return content
