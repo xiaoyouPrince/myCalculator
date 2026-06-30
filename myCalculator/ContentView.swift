@@ -49,12 +49,14 @@ struct ContentView: View {
     @State private var exportContentType: UTType = .commaSeparatedText
     @State private var exportFilename = "work-schedules"
     @State private var isExporting = false
+    @State private var emphasizesEffectiveOvertime = true
 
     var body: some View {
         NavigationSplitView {
             SidebarView(
                 selectedDate: $selectedDate,
                 daySchedules: $daySchedules,
+                emphasizesEffectiveOvertime: emphasizesEffectiveOvertime,
                 onOpenJSONFile: openPersistedJSONFile,
                 onExportCSV: exportSchedulesCSV,
                 onExportMinimalJSON: exportMinimalSchedulesJSON
@@ -65,7 +67,12 @@ struct ContentView: View {
             VStack(spacing: 0) {
                 toolbar
                 Divider()
-                CalendarContentView(mode: $selectedMode, date: $selectedDate, daySchedules: $daySchedules)
+                CalendarContentView(
+                    mode: $selectedMode,
+                    date: $selectedDate,
+                    daySchedules: $daySchedules,
+                    emphasizesEffectiveOvertime: $emphasizesEffectiveOvertime
+                )
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .background(Color(.windowBackgroundColor))
             }
@@ -161,6 +168,9 @@ struct ContentView: View {
                 .frame(minWidth: 180, alignment: .leading)
 
             Spacer()
+
+            Toggle("着重展示", isOn: $emphasizesEffectiveOvertime)
+                .toggleStyle(.switch)
 
             Picker("视图模式", selection: $selectedMode) {
                 ForEach(CalendarMode.allCases) { mode in

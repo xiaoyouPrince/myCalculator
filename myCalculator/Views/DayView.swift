@@ -3,6 +3,7 @@ import SwiftUI
 struct DayView: View {
     @Binding var date: Date
     @Binding var daySchedules: [Date: WorkSchedule]
+    @Binding var emphasizesEffectiveOvertime: Bool
     @State private var showEditPanel = false
     @State private var selectedKind: WorkLogKind = .work
     @State private var customNote = ""
@@ -29,7 +30,7 @@ struct DayView: View {
             if let summary = selectedDaySummary {
                 VStack(alignment: .leading, spacing: 8) {
                     ForEach(summary.lines, id: \.self) { line in
-                        Text(line)
+                        WorkSummaryLineText(line: line, emphasizesEffectiveOvertime: emphasizesEffectiveOvertime)
                     }
                 }
                 .font(.body)
