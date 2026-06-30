@@ -4,15 +4,28 @@ struct CalendarContentView: View {
     @Binding var mode: ContentView.CalendarMode
     @Binding var date: Date
     @Binding var daySchedules: [Date: WorkSchedule]
+    @Binding var emphasizesEffectiveOvertime: Bool
 
     var body: some View {
         switch mode {
         case .day:
-            DayView(date: $date, daySchedules: $daySchedules)
+            DayView(
+                date: $date,
+                daySchedules: $daySchedules,
+                emphasizesEffectiveOvertime: $emphasizesEffectiveOvertime
+            )
         case .week:
-            WeekView(date: $date, daySchedules: $daySchedules)
+            WeekView(
+                date: $date,
+                daySchedules: $daySchedules,
+                emphasizesEffectiveOvertime: $emphasizesEffectiveOvertime
+            )
         case .month:
-            MonthView(date: $date, daySchedules: $daySchedules)
+            MonthView(
+                date: $date,
+                daySchedules: $daySchedules,
+                emphasizesEffectiveOvertime: $emphasizesEffectiveOvertime
+            )
         case .year:
             YearView(date: $date, mode: $mode, daySchedules: $daySchedules)
         }

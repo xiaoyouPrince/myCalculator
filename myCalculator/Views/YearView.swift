@@ -36,9 +36,11 @@ struct YearView: View {
                                 VStack(spacing: 4) {
                                     Text(month)
                                         .font(.headline)
-                                    Text("(\(String(format: "%.2f", effectiveOvertime)))")
-                                        .font(.subheadline)
-                                        .foregroundStyle(.secondary)
+                                    if effectiveOvertime > 0 {
+                                        Text("(\(String(format: "%.2f", effectiveOvertime)))")
+                                            .font(.subheadline)
+                                            .foregroundStyle(.secondary)
+                                    }
                                 }
                             )
                     }

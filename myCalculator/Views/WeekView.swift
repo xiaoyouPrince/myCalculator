@@ -3,6 +3,7 @@ import SwiftUI
 struct WeekView: View {
     @Binding var date: Date
     @Binding var daySchedules: [Date: WorkSchedule]
+    @Binding var emphasizesEffectiveOvertime: Bool
     @State private var selectedPanelDate: Date?
     @State private var isEditingTime = false
     @State private var selectedKind: WorkLogKind = .work
@@ -45,7 +46,11 @@ struct WeekView: View {
 
                     ForEach(weekDays) { day in
                         WeekDateCell(title: day.dateTitle, onTap: { openPanel(for: day.id) })
-                        WeekDetailCell(summary: day.summary, onTap: { openPanel(for: day.id) })
+                        WeekDetailCell(
+                            summary: day.summary,
+                            emphasizesEffectiveOvertime: emphasizesEffectiveOvertime,
+                            onTap: { openPanel(for: day.id) }
+                        )
                     }
                 }
             }
@@ -63,6 +68,7 @@ struct WeekView: View {
                     WorkDetailPanel(
                         targetDate: panelDate,
                         summary: summary,
+                        emphasizesEffectiveOvertime: emphasizesEffectiveOvertime,
                         onEdit: { isEditingTime = true },
                         onClose: { selectedPanelDate = nil }
                     )

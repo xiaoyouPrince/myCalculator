@@ -63,6 +63,7 @@ struct WorkTimeInputPanel: View {
 struct WorkDetailPanel: View {
     let targetDate: Date
     let summary: MonthScheduleSummary
+    let emphasizesEffectiveOvertime: Bool
     let onEdit: () -> Void
     let onClose: () -> Void
 
@@ -77,7 +78,10 @@ struct WorkDetailPanel: View {
 
             VStack(alignment: .leading, spacing: 6) {
                 ForEach(summary.lines, id: \.self) { line in
-                    Text(line)
+                    WorkSummaryLineText(
+                        line: line,
+                        emphasizesEffectiveOvertime: emphasizesEffectiveOvertime
+                    )
                 }
             }
             .font(.body)

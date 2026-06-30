@@ -41,6 +41,7 @@ struct WeekDateCell: View {
 
 struct WeekDetailCell: View {
     let summary: MonthScheduleSummary?
+    let emphasizesEffectiveOvertime: Bool
     let onTap: () -> Void
 
     var body: some View {
@@ -48,7 +49,10 @@ struct WeekDetailCell: View {
             VStack(alignment: .leading, spacing: 2) {
                 if let summary {
                     ForEach(summary.lines, id: \.self) { line in
-                        Text(line)
+                        WorkSummaryLineText(
+                            line: line,
+                            emphasizesEffectiveOvertime: emphasizesEffectiveOvertime
+                        )
                     }
                 } else {
                     Text("暂无记录")

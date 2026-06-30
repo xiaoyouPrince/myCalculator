@@ -3,6 +3,7 @@ import SwiftUI
 struct SidebarView: View {
     @Binding var selectedDate: Date
     @Binding var daySchedules: [Date: WorkSchedule]
+    let emphasizesEffectiveOvertime: Bool
     let onOpenJSONFile: () -> Void
     let onExportCSV: (ScheduleExportScope) -> Void
     let onExportMinimalJSON: (ScheduleExportScope) -> Void
@@ -24,7 +25,7 @@ struct SidebarView: View {
                         VStack(alignment: .leading, spacing: 10) {
                             if let summary = selectedDaySummary {
                                 ForEach(summary.lines, id: \.self) { line in
-                                    Text(line)
+                                    WorkSummaryLineText(line: line, emphasizesEffectiveOvertime: emphasizesEffectiveOvertime)
                                 }
                             } else {
                                 Text("当日暂无记录")

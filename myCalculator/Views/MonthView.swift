@@ -3,6 +3,7 @@ import SwiftUI
 struct MonthView: View {
     @Binding var date: Date
     @Binding var daySchedules: [Date: WorkSchedule]
+    @Binding var emphasizesEffectiveOvertime: Bool
     private let weekDayTitles = ["一", "二", "三", "四", "五", "六", "日"]
     @State private var selectedPanelDate: Date?
     @State private var isEditingTime = false
@@ -67,6 +68,7 @@ struct MonthView: View {
                     WorkDetailPanel(
                         targetDate: panelDate,
                         summary: summary,
+                        emphasizesEffectiveOvertime: emphasizesEffectiveOvertime,
                         onEdit: { isEditingTime = true },
                         onClose: { selectedPanelDate = nil }
                     )
@@ -111,6 +113,7 @@ struct MonthView: View {
                 displayedMonthDate: date,
                 cellHeight: cellHeight,
                 scheduleSummary: scheduleSummary(for: day.id),
+                emphasizesEffectiveOvertime: emphasizesEffectiveOvertime,
                 onTap: { openPanel(for: day.id) }
             )
         }
@@ -297,6 +300,7 @@ struct MonthDayCell: View {
     let displayedMonthDate: Date
     let cellHeight: CGFloat
     let scheduleSummary: MonthScheduleSummary?
+    let emphasizesEffectiveOvertime: Bool
     let onTap: () -> Void
 
     var body: some View {
@@ -311,11 +315,14 @@ struct MonthDayCell: View {
                 if let summary = scheduleSummary {
                     VStack(alignment: .leading, spacing: 2) {
                         ForEach(summary.lines, id: \.self) { line in
-                            Text(line)
+                            WorkSummaryLineText(
+                                line: line,
+                                emphasizesEffectiveOvertime: emphasizesEffectiveOvertime,
+                                defaultColor: summaryForegroundStyle
+                            )
                         }
                     }
                     .font(.caption2)
-                    .foregroundStyle(summaryForegroundStyle)
                     .lineLimit(1)
                     .padding(.horizontal, 8)
                 }
