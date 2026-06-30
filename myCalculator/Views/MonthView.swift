@@ -23,7 +23,7 @@ struct MonthView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("月视图")
                         .font(.title2.bold())
-                    Text(date.formatted(.dateTime.year().month()))
+                    Text(monthTitle)
                         .foregroundStyle(.secondary)
                 }
                 Spacer()
@@ -51,6 +51,7 @@ struct MonthView: View {
                             weekRow(week, cellHeight: adaptiveHeight)
                         }
                     }
+                    .id(monthIdentity)
                 }
             }
         }
@@ -107,6 +108,7 @@ struct MonthView: View {
         ForEach(week.days) { day in
             MonthDayCell(
                 day: day,
+                displayedMonthDate: date,
                 cellHeight: cellHeight,
                 scheduleSummary: scheduleSummary(for: day.id),
                 onTap: { openPanel(for: day.id) }
@@ -159,6 +161,8 @@ struct MonthView: View {
             return []
         }
 
+        let targetYear = calendar.component(.year, from: interval.start)
+        let targetMonth = calendar.component(.month, from: interval.start)
         var weeks: [MonthWeek] = []
         var cursor = firstMonday
 
@@ -170,7 +174,8 @@ struct MonthView: View {
                 guard let currentDate = calendar.date(byAdding: .day, value: offset, to: cursor) else {
                     continue
                 }
-                let inCurrentMonth = calendar.isDate(currentDate, equalTo: date, toGranularity: .month)
+                let inCurrentMonth = calendar.component(.year, from: currentDate) == targetYear &&
+                    calendar.component(.month, from: currentDate) == targetMonth
                 days.append(
                     MonthDay(
                         id: currentDate,
@@ -187,7 +192,8 @@ struct MonthView: View {
             let hasCurrentMonth = days.contains { $0.isCurrentMonth }
             let nextStillHasCurrentMonth = (0..<7).contains { offset in
                 guard let d = calendar.date(byAdding: .day, value: offset, to: nextWeek) else { return false }
-                return calendar.isDate(d, equalTo: date, toGranularity: .month)
+                return calendar.component(.year, from: d) == targetYear &&
+                    calendar.component(.month, from: d) == targetMonth
             }
 
             if hasCurrentMonth && !nextStillHasCurrentMonth {
@@ -210,8 +216,24 @@ struct MonthView: View {
         WorkScheduleStore.save(daySchedules)
     }
 
+    private var monthTitle: String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "zh_CN")
+        formatter.dateFormat = "yyyy年M月"
+        return formatter.string(from: date)
+    }
+
+    private var monthIdentity: String {
+        let calendar = Calendar.current
+        let year = calendar.component(.year, from: date)
+        let month = calendar.component(.month, from: date)
+        return "\(year)-\(month)"
+    }
+
     private func changeMonth(by value: Int) {
-        guard let target = Calendar.current.date(byAdding: .month, value: value, to: date) else { return }
+        let calendar = Calendar.current
+        let anchorDate = calendar.dateInterval(of: .month, for: date)?.start ?? date
+        guard let target = calendar.date(byAdding: .month, value: value, to: anchorDate) else { return }
         date = target
     }
 
@@ -272,6 +294,7 @@ struct MonthWeekNumberCell: View {
 
 struct MonthDayCell: View {
     let day: MonthDay
+    let displayedMonthDate: Date
     let cellHeight: CGFloat
     let scheduleSummary: MonthScheduleSummary?
     let onTap: () -> Void
@@ -281,7 +304,7 @@ struct MonthDayCell: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text("\(day.day)")
                     .font(.subheadline)
-                    .foregroundStyle(day.isCurrentMonth ? Color.primary : Color.secondary.opacity(0.5))
+                    .foregroundStyle(isInDisplayedMonth ? Color.black.opacity(0.82) : Color.secondary.opacity(0.45))
                     .padding(.top, 8)
                     .padding(.leading, 8)
 
@@ -292,14 +315,14 @@ struct MonthDayCell: View {
                         }
                     }
                     .font(.caption2)
-                    .foregroundStyle(summary.isWorkLog ? .blue : .secondary)
+                    .foregroundStyle(summaryForegroundStyle)
                     .lineLimit(1)
                     .padding(.horizontal, 8)
                 }
                 Spacer()
             }
             .frame(maxWidth: .infinity, minHeight: cellHeight, alignment: .topLeading)
-            .background(day.isToday ? Color.blue.opacity(0.14) : Color.clear)
+            .background(day.isToday && isInDisplayedMonth ? Color.blue.opacity(0.14) : Color.clear)
             .overlay(
                 Rectangle()
                     .stroke(Color.gray.opacity(0.15), lineWidth: 0.5)
@@ -308,5 +331,18 @@ struct MonthDayCell: View {
         }
         .buttonStyle(.plain)
         .contentShape(Rectangle())
+    }
+
+    private var isInDisplayedMonth: Bool {
+        let calendar = Calendar.current
+        return calendar.component(.year, from: day.id) == calendar.component(.year, from: displayedMonthDate) &&
+            calendar.component(.month, from: day.id) == calendar.component(.month, from: displayedMonthDate)
+    }
+
+    private var summaryForegroundStyle: Color {
+        guard isInDisplayedMonth else {
+            return Color.secondary.opacity(0.45)
+        }
+        return scheduleSummary?.isWorkLog == true ? .blue : .secondary
     }
 }

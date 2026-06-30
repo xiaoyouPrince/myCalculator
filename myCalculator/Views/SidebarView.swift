@@ -13,12 +13,10 @@ struct SidebarView: View {
 
     var body: some View {
         GeometryReader { proxy in
-            let useCompactDatePicker = proxy.size.height < 760
-
             ZStack(alignment: .bottom) {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 16) {
-                        datePickerSection(useCompact: useCompactDatePicker)
+                        datePickerSection
 
                         Text("当日")
                             .font(.headline)
@@ -169,40 +167,22 @@ struct SidebarView: View {
         .frame(width: 160)
     }
 
-    @ViewBuilder
-    private func datePickerSection(useCompact: Bool) -> some View {
-        if useCompact {
-            VStack(alignment: .leading, spacing: 8) {
-                Text("选择日期")
-                    .font(.headline)
-                DatePicker("",
-                           selection: $selectedDate,
-                           displayedComponents: .date)
-                    .labelsHidden()
-                    .datePickerStyle(.compact)
-            }
-            .padding(10)
-            .background(
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(Color.white.opacity(0.75))
-            )
-        } else {
-            VStack(alignment: .leading, spacing: 8) {
-                Text("选择日期")
-                    .font(.headline)
-                DatePicker("",
-                           selection: $selectedDate,
-                           displayedComponents: .date)
-                    .labelsHidden()
-                    .datePickerStyle(.graphical)
-                    .frame(maxHeight: 320)
-            }
-            .padding(10)
-            .background(
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(Color.white.opacity(0.75))
-            )
+    private var datePickerSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("选择日期")
+                .font(.headline)
+            DatePicker("",
+                       selection: $selectedDate,
+                       displayedComponents: .date)
+                .labelsHidden()
+                .datePickerStyle(.graphical)
+                .frame(maxHeight: 320)
         }
+        .padding(10)
+        .background(
+            RoundedRectangle(cornerRadius: 10)
+                .fill(Color.white.opacity(0.75))
+        )
     }
 
     private var selectedDaySummary: MonthScheduleSummary? {
