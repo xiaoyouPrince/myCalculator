@@ -14,9 +14,6 @@
 		B4CE9E9A2F883EC0008187A8 /* month-view-rendering-postmortem.md in Resources */ = {isa = PBXBuildFile; fileRef = B4CE9E992F883EC0008187A8 /* month-view-rendering-postmortem.md */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXBuildRule section */
-	/* End PBXBuildRule section */
-
 /* Begin PBXFileReference section */
 		B4CE9E462F878514008187A8 /* myCalculator.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = myCalculator.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B4CE9E902F87AA0F008187A8 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
@@ -55,6 +52,14 @@
 			);
 			sourceTree = "<group>";
 		};
+		B4CE9E472F878514008187A8 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				B4CE9E462F878514008187A8 /* myCalculator.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		B4CE9E942F883A39008187A8 /* docs */ = {
 			isa = PBXGroup;
 			children = (
@@ -64,14 +69,6 @@
 				B4CE9E922F883A39008187A8 /* swiftui-uikit-mental-models.md */,
 			);
 			path = docs;
-			sourceTree = "<group>";
-		};
-		B4CE9E472F878514008187A8 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				B4CE9E462F878514008187A8 /* myCalculator.app */,
-			);
-			name = Products;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -132,9 +129,6 @@
 			);
 		};
 /* End PBXProject section */
-
-/* Begin PBXShellScriptBuildPhase section */
-/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXResourcesBuildPhase section */
 		B4CE9E442F878514008187A8 /* Resources */ = {
