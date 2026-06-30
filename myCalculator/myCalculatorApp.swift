@@ -16,18 +16,24 @@ struct myCalculatorApp: App {
         }
         .defaultSize(width: 1080, height: 700)
         .commands {
-            WorkRulesHelpCommands()
+            AppHelpCommands()
         }
 
         Window("工时计算规则", id: "workRulesHelp") {
-            WorkRulesHelpView()
+            MarkdownHelpView(markdown: WorkRulesHelpContent.load())
+                .frame(minWidth: 720, minHeight: 560)
+        }
+        .defaultSize(width: 820, height: 680)
+
+        Window("SwiftUI 与 UIKit 心智模型", id: "swiftUIUIKitMentalModels") {
+            MarkdownHelpView(markdown: SwiftUIUIKitMentalModelsContent.load())
                 .frame(minWidth: 720, minHeight: 560)
         }
         .defaultSize(width: 820, height: 680)
     }
 }
 
-private struct WorkRulesHelpCommands: Commands {
+private struct AppHelpCommands: Commands {
     @Environment(\.openWindow) private var openWindow
 
     var body: some Commands {
@@ -36,12 +42,20 @@ private struct WorkRulesHelpCommands: Commands {
                 openWindow(id: "workRulesHelp")
             }
             .keyboardShortcut("?", modifiers: [.command])
+
+            Button("SwiftUI 与 UIKit 心智模型") {
+                openWindow(id: "swiftUIUIKitMentalModels")
+            }
         }
     }
 }
 
-private struct WorkRulesHelpView: View {
-    private let blocks = MarkdownHelpParser.parse(WorkRulesHelpContent.load())
+private struct MarkdownHelpView: View {
+    private let blocks: [MarkdownHelpBlock]
+
+    init(markdown: String) {
+        blocks = MarkdownHelpParser.parse(markdown)
+    }
 
     var body: some View {
         ScrollView {
@@ -53,6 +67,18 @@ private struct WorkRulesHelpView: View {
             .padding(24)
             .frame(maxWidth: .infinity, alignment: .leading)
         }
+    }
+}
+
+private enum SwiftUIUIKitMentalModelsContent {
+    static func load() -> String {
+        guard let url = Bundle.main.url(forResource: "swiftui-uikit-mental-models", withExtension: "md"),
+              let content = try? String(contentsOf: url, encoding: .utf8)
+        else {
+            return "未找到 SwiftUI 与 UIKit 心智模型文档。"
+        }
+
+        return content
     }
 }
 

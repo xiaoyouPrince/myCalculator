@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		B4CE9E912F87AA0F008187A8 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = B4CE9E902F87AA0F008187A8 /* README.md */; };
+		B4CE9E932F883A39008187A8 /* swiftui-uikit-mental-models.md in Resources */ = {isa = PBXBuildFile; fileRef = B4CE9E922F883A39008187A8 /* swiftui-uikit-mental-models.md */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXBuildRule section */
@@ -16,6 +17,7 @@
 /* Begin PBXFileReference section */
 		B4CE9E462F878514008187A8 /* myCalculator.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = myCalculator.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B4CE9E902F87AA0F008187A8 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		B4CE9E922F883A39008187A8 /* swiftui-uikit-mental-models.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "swiftui-uikit-mental-models.md"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -41,9 +43,18 @@
 			isa = PBXGroup;
 			children = (
 				B4CE9E902F87AA0F008187A8 /* README.md */,
+				B4CE9E942F883A39008187A8 /* docs */,
 				B4CE9E482F878514008187A8 /* myCalculator */,
 				B4CE9E472F878514008187A8 /* Products */,
 			);
+			sourceTree = "<group>";
+		};
+		B4CE9E942F883A39008187A8 /* docs */ = {
+			isa = PBXGroup;
+			children = (
+				B4CE9E922F883A39008187A8 /* swiftui-uikit-mental-models.md */,
+			);
+			path = docs;
 			sourceTree = "<group>";
 		};
 		B4CE9E472F878514008187A8 /* Products */ = {
@@ -122,6 +133,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B4CE9E912F87AA0F008187A8 /* README.md in Resources */,
+				B4CE9E932F883A39008187A8 /* swiftui-uikit-mental-models.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
