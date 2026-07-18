@@ -4,6 +4,7 @@ struct DayView: View {
     @Binding var date: Date
     @Binding var daySchedules: [Date: WorkSchedule]
     @Binding var emphasizesEffectiveOvertime: Bool
+    @Environment(\.workCalculationRuleID) private var workCalculationRuleID
     @State private var showEditPanel = false
     @State private var selectedKind: WorkLogKind = .work
     @State private var customNote = ""
@@ -66,7 +67,7 @@ struct DayView: View {
     private var selectedDaySummary: MonthScheduleSummary? {
         let key = normalizedDay(date)
         guard let schedule = daySchedules[key] else { return nil }
-        return MonthScheduleSummary.from(schedule: schedule)
+        return WorkCalculationEngine.daySummary(date: key, schedule: schedule, ruleID: workCalculationRuleID)
     }
 
     private func prepareEditor() {

