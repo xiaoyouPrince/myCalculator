@@ -4,6 +4,7 @@ struct WeekView: View {
     @Binding var date: Date
     @Binding var daySchedules: [Date: WorkSchedule]
     @Binding var emphasizesEffectiveOvertime: Bool
+    @Environment(\.workCalculationRuleID) private var workCalculationRuleID
     @State private var selectedPanelDate: Date?
     @State private var isEditingTime = false
     @State private var selectedKind: WorkLogKind = .work
@@ -64,7 +65,13 @@ struct WeekView: View {
             )
         ) {
             if let panelDate = selectedPanelDate {
-                if let summary = daySchedules[normalizedDay(panelDate)].map(MonthScheduleSummary.from), !isEditingTime {
+                if let schedule = daySchedules[normalizedDay(panelDate)],
+                   !isEditingTime {
+                    let summary = WorkCalculationEngine.daySummary(
+                        date: normalizedDay(panelDate),
+                        schedule: schedule,
+                        ruleID: workCalculationRuleID
+                    )
                     WorkDetailPanel(
                         targetDate: panelDate,
                         summary: summary,
@@ -124,7 +131,9 @@ struct WeekView: View {
                 return nil
             }
             let key = calendar.startOfDay(for: dayDate)
-            let summary = daySchedules[key].map(MonthScheduleSummary.from)
+            let summary = daySchedules[key].map { schedule in
+                WorkCalculationEngine.daySummary(date: key, schedule: schedule, ruleID: workCalculationRuleID)
+            }
             return WeekDayDetail(id: key, dateTitle: "\(weekdayNames[offset]) \(formatter.string(from: dayDate))", summary: summary)
         }
     }

@@ -50,6 +50,7 @@ struct ContentView: View {
     @State private var exportFilename = "work-schedules"
     @State private var isExporting = false
     @State private var emphasizesEffectiveOvertime = true
+    @AppStorage("selectedCalculationRuleID") private var selectedCalculationRuleID = WorkCalculationRegistry.defaultRuleID
 
     var body: some View {
         NavigationSplitView {
@@ -77,6 +78,7 @@ struct ContentView: View {
                     .background(Color(.windowBackgroundColor))
             }
         }
+        .environment(\.workCalculationRuleID, selectedCalculationRuleID)
         .navigationSplitViewStyle(.balanced)
         .onAppear {
             daySchedules = WorkScheduleStore.load()
@@ -99,7 +101,9 @@ struct ContentView: View {
 
     private func exportSchedulesCSV(scope: ScheduleExportScope) {
         let schedules = schedulesForExport(scope: scope)
-        exportDocument = TextExportDocument(content: WorkScheduleStore.exportCSV(from: schedules))
+        exportDocument = TextExportDocument(
+            content: WorkScheduleStore.exportCSV(from: schedules, ruleID: selectedCalculationRuleID)
+        )
         exportContentType = .commaSeparatedText
         exportFilename = exportFilename(prefix: "work-schedules", scope: scope)
         isExporting = true
@@ -169,6 +173,8 @@ struct ContentView: View {
 
             Spacer()
 
+            calculationRulePicker
+
             Toggle("着重展示", isOn: $emphasizesEffectiveOvertime)
                 .toggleStyle(.switch)
 
@@ -183,6 +189,21 @@ struct ContentView: View {
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
         .background(.thinMaterial)
+    }
+
+    private var calculationRulePicker: some View {
+        Picker("计算规则", selection: $selectedCalculationRuleID) {
+            ForEach(WorkCalculationRegistry.all, id: \.id) { rule in
+                Text(rule.title).tag(rule.id)
+            }
+        }
+        .pickerStyle(.menu)
+        .frame(maxWidth: 220)
+        .help(selectedCalculationRuleSummary)
+    }
+
+    private var selectedCalculationRuleSummary: String {
+        WorkCalculationRegistry.rule(id: selectedCalculationRuleID).summary
     }
 }
 

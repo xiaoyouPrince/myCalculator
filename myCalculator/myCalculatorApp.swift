@@ -43,6 +43,12 @@ struct myCalculatorApp: App {
         }
         .defaultSize(width: 820, height: 680)
 
+        Window("计算规则扩展指南", id: "calculationRulesGuide") {
+            MarkdownHelpView(markdown: MarkdownDocumentContent.load(resource: "calculation-rules-guide", missingMessage: "未找到计算规则扩展指南。"))
+                .frame(minWidth: 720, minHeight: 560)
+        }
+        .defaultSize(width: 820, height: 680)
+
         Window("问题复盘：月视图跨月渲染", id: "monthViewRenderingPostmortem") {
             MarkdownHelpView(markdown: MarkdownDocumentContent.load(resource: "month-view-rendering-postmortem", missingMessage: "未找到月视图渲染问题复盘。"))
                 .frame(minWidth: 720, minHeight: 560)
@@ -79,6 +85,10 @@ private struct AppHelpCommands: Commands {
 
             Button("浏览器扩展自动填报") {
                 openWindow(id: "browserExtensionAutofill")
+            }
+
+            Button("计算规则扩展指南") {
+                openWindow(id: "calculationRulesGuide")
             }
 
             Divider()

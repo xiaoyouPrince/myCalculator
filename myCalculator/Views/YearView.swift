@@ -4,6 +4,7 @@ struct YearView: View {
     @Binding var date: Date
     @Binding var mode: ContentView.CalendarMode
     @Binding var daySchedules: [Date: WorkSchedule]
+    @Environment(\.workCalculationRuleID) private var workCalculationRuleID
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -55,15 +56,11 @@ struct YearView: View {
     private func monthlyEffectiveOvertime(month: Int) -> Double {
         let calendar = Calendar.current
         let targetYear = calendar.component(.year, from: date)
-        return daySchedules.reduce(0.0) { partial, item in
-            let day = item.key
-            let schedule = item.value
-            let year = calendar.component(.year, from: day)
-            let currentMonth = calendar.component(.month, from: day)
-            guard year == targetYear && currentMonth == month else {
-                return partial
-            }
-            return partial + WorkMetrics.from(schedule: schedule).effectiveOvertimeHours
-        }
+        return WorkCalculationEngine.monthEffectiveOvertime(
+            schedules: daySchedules,
+            year: targetYear,
+            month: month,
+            ruleID: workCalculationRuleID
+        )
     }
 }

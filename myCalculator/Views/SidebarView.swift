@@ -3,6 +3,7 @@ import SwiftUI
 struct SidebarView: View {
     @Binding var selectedDate: Date
     @Binding var daySchedules: [Date: WorkSchedule]
+    @Environment(\.workCalculationRuleID) private var workCalculationRuleID
     let emphasizesEffectiveOvertime: Bool
     let onOpenJSONFile: () -> Void
     let onExportCSV: (ScheduleExportScope) -> Void
@@ -189,7 +190,11 @@ struct SidebarView: View {
     private var selectedDaySummary: MonthScheduleSummary? {
         let selectedKey = Calendar.current.startOfDay(for: selectedDate)
         guard let schedule = daySchedules[selectedKey] else { return nil }
-        return MonthScheduleSummary.from(schedule: schedule)
+        return WorkCalculationEngine.daySummary(
+            date: selectedKey,
+            schedule: schedule,
+            ruleID: workCalculationRuleID
+        )
     }
 
     private var weekTitle: String {
@@ -220,26 +225,8 @@ struct SidebarView: View {
 
         guard !schedulesInWeek.isEmpty else { return nil }
 
-        var totalWorkMinutes = 0
-        var totalDeclaredWorkHours = 0.0
-        var totalOvertimeHours = 0.0
-        var totalEffectiveOvertimeHours = 0.0
-
-        for (_, schedule) in schedulesInWeek {
-            let metrics = WorkMetrics.from(schedule: schedule)
-            totalWorkMinutes += metrics.workMinutes
-            totalDeclaredWorkHours += metrics.declaredWorkHours
-            totalOvertimeHours += metrics.overtimeHours
-            totalEffectiveOvertimeHours += metrics.effectiveOvertimeHours
-        }
-
-        return WeekSummary(
-            recordedDays: schedulesInWeek.count,
-            workHours: Double(totalWorkMinutes) / 60.0,
-            declaredWorkHours: totalDeclaredWorkHours,
-            overtimeHours: totalOvertimeHours,
-            effectiveOvertimeHours: totalEffectiveOvertimeHours
-        )
+        let entries = schedulesInWeek.map { (date: $0.key, schedule: $0.value) }
+        return WorkCalculationEngine.aggregateSummary(entries: entries, ruleID: workCalculationRuleID)
     }
 
     private var monthTitle: String {
@@ -262,25 +249,7 @@ struct SidebarView: View {
 
         guard !schedulesInMonth.isEmpty else { return nil }
 
-        var totalWorkMinutes = 0
-        var totalDeclaredWorkHours = 0.0
-        var totalOvertimeHours = 0.0
-        var totalEffectiveOvertimeHours = 0.0
-
-        for (_, schedule) in schedulesInMonth {
-            let metrics = WorkMetrics.from(schedule: schedule)
-            totalWorkMinutes += metrics.workMinutes
-            totalDeclaredWorkHours += metrics.declaredWorkHours
-            totalOvertimeHours += metrics.overtimeHours
-            totalEffectiveOvertimeHours += metrics.effectiveOvertimeHours
-        }
-
-        return WeekSummary(
-            recordedDays: schedulesInMonth.count,
-            workHours: Double(totalWorkMinutes) / 60.0,
-            declaredWorkHours: totalDeclaredWorkHours,
-            overtimeHours: totalOvertimeHours,
-            effectiveOvertimeHours: totalEffectiveOvertimeHours
-        )
+        let entries = schedulesInMonth.map { (date: $0.key, schedule: $0.value) }
+        return WorkCalculationEngine.aggregateSummary(entries: entries, ruleID: workCalculationRuleID)
     }
 }

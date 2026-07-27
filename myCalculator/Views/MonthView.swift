@@ -4,6 +4,7 @@ struct MonthView: View {
     @Binding var date: Date
     @Binding var daySchedules: [Date: WorkSchedule]
     @Binding var emphasizesEffectiveOvertime: Bool
+    @Environment(\.workCalculationRuleID) private var workCalculationRuleID
     private let weekDayTitles = ["一", "二", "三", "四", "五", "六", "日"]
     @State private var selectedPanelDate: Date?
     @State private var isEditingTime = false
@@ -64,7 +65,13 @@ struct MonthView: View {
             )
         ) {
             if let panelDate = selectedPanelDate {
-                if let summary = daySchedules[normalizedDay(panelDate)].map(MonthScheduleSummary.from), !isEditingTime {
+                if let schedule = daySchedules[normalizedDay(panelDate)],
+                   !isEditingTime {
+                    let summary = WorkCalculationEngine.daySummary(
+                        date: normalizedDay(panelDate),
+                        schedule: schedule,
+                        ruleID: workCalculationRuleID
+                    )
                     WorkDetailPanel(
                         targetDate: panelDate,
                         summary: summary,
@@ -145,7 +152,7 @@ struct MonthView: View {
     private func scheduleSummary(for targetDate: Date) -> MonthScheduleSummary? {
         let key = normalizedDay(targetDate)
         guard let schedule = daySchedules[key] else { return nil }
-        return MonthScheduleSummary.from(schedule: schedule)
+        return WorkCalculationEngine.daySummary(date: key, schedule: schedule, ruleID: workCalculationRuleID)
     }
 
     private func normalizedDay(_ input: Date) -> Date {

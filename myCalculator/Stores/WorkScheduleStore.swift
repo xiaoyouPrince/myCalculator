@@ -51,7 +51,8 @@ enum WorkScheduleStore {
         storeFileURL()
     }
 
-    nonisolated static func exportCSV(from schedules: [Date: WorkSchedule]) -> String {
+    nonisolated static func exportCSV(from schedules: [Date: WorkSchedule], ruleID: String = WorkCalculationRegistry.defaultRuleID) -> String {
+        let metadata = "# calculationRuleID: \(ruleID)\n"
         let header = [
             "日期",
             "类型",
@@ -68,10 +69,10 @@ enum WorkScheduleStore {
         let rows = schedules
             .sorted { $0.key < $1.key }
             .map { date, schedule in
-                csvRow(for: date, schedule: schedule)
+                csvRow(for: date, schedule: schedule, ruleID: ruleID)
             }
 
-        return ([header.map(csvField).joined(separator: ",")] + rows).joined(separator: "\n") + "\n"
+        return metadata + ([header.map(csvField).joined(separator: ",")] + rows).joined(separator: "\n") + "\n"
     }
 
     nonisolated static func exportMinimalJSON(from schedules: [Date: WorkSchedule]) -> String {
@@ -126,11 +127,11 @@ enum WorkScheduleStore {
         return formatter.date(from: key).map { calendar.startOfDay(for: $0) }
     }
 
-    nonisolated private static func csvRow(for date: Date, schedule: WorkSchedule) -> String {
+    nonisolated private static func csvRow(for date: Date, schedule: WorkSchedule, ruleID: String) -> String {
         let day = dayKey(from: date)
 
         if schedule.isWorkLog {
-            let metrics = WorkMetrics.from(schedule: schedule)
+            let metrics = WorkCalculationEngine.metrics(date: date, schedule: schedule, ruleID: ruleID)
             let values = [
                 day,
                 schedule.kind.title,
