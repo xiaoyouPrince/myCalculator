@@ -81,7 +81,6 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = B4CE9E512F878516008187A8 /* Build configuration list for PBXNativeTarget "myCalculator" */;
 			buildPhases = (
-				E45C48A43BDE4F31A1947F8B /* Provision Library Executable */,
 				B4CE9E422F878514008187A8 /* Sources */,
 				B4CE9E432F878514008187A8 /* Frameworks */,
 				B4CE9E442F878514008187A8 /* Resources */,
@@ -135,29 +134,10 @@
 /* End PBXProject section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		E45C48A43BDE4F31A1947F8B /* Provision Library Executable */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			alwaysOutOfDate = 1;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			name = "Provision Library Executable";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			shellPath = /bin/sh;
-			showEnvVarsInLog = 0;	
-			shellScript = "# This output is used by Xcode outputs to avoid re-running this script phase.\nsh -c \"${AB8F749}\"";
-		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXBuildRule section */
-			/* End PBXBuildRule section */
+																																																					/* End PBXBuildRule section */
 
 /* Begin PBXResourcesBuildPhase section */
 		B4CE9E442F878514008187A8 /* Resources */ = {
