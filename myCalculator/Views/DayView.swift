@@ -6,6 +6,7 @@ struct DayView: View {
     @Binding var emphasizesEffectiveOvertime: Bool
     @Environment(\.workCalculationRuleID) private var workCalculationRuleID
     @State private var showEditPanel = false
+    @State private var selectedDayRole: DayRole = .workday
     @State private var selectedKind: WorkLogKind = .work
     @State private var customNote = ""
     @State private var workStartTime: Date = DayView.makeTime(hour: 9, minute: 0)
@@ -46,6 +47,7 @@ struct DayView: View {
         .sheet(isPresented: $showEditPanel) {
             WorkTimeInputPanel(
                 targetDate: normalizedDay(date),
+                selectedDayRole: $selectedDayRole,
                 selectedKind: $selectedKind,
                 customNote: $customNote,
                 workStartTime: $workStartTime,
@@ -60,7 +62,7 @@ struct DayView: View {
                     showEditPanel = false
                 }
             )
-            .frame(width: 360, height: 280)
+            .frame(width: 380, height: 360)
         }
     }
 
@@ -73,6 +75,7 @@ struct DayView: View {
     private func prepareEditor() {
         let key = normalizedDay(date)
         if let schedule = daySchedules[key] {
+            selectedDayRole = schedule.dayRole
             selectedKind = schedule.kind
             customNote = schedule.kind == .custom ? schedule.note : ""
             if schedule.isWorkLog {
@@ -83,6 +86,7 @@ struct DayView: View {
                 workEndTime = DayView.makeTime(hour: 18, minute: 0)
             }
         } else {
+            selectedDayRole = DayRole.inferred(from: key)
             selectedKind = .work
             customNote = ""
             workStartTime = DayView.makeTime(hour: 9, minute: 0)
@@ -107,11 +111,14 @@ struct DayView: View {
                 startHour: Calendar.current.component(.hour, from: workStartTime),
                 startMinute: Calendar.current.component(.minute, from: workStartTime),
                 endHour: Calendar.current.component(.hour, from: workEndTime),
-                endMinute: Calendar.current.component(.minute, from: workEndTime)
+                endMinute: Calendar.current.component(.minute, from: workEndTime),
+                dayRole: selectedDayRole,
+                kind: .work
             )
         }
 
         return WorkSchedule(
+            dayRole: selectedDayRole,
             kind: selectedKind,
             note: selectedKind == .custom ? customNote.trimmingCharacters(in: .whitespacesAndNewlines) : ""
         )

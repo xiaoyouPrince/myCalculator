@@ -20,6 +20,7 @@ enum WorkScheduleStore {
                     startMinute: record.startMinute,
                     endHour: record.endHour,
                     endMinute: record.endMinute,
+                    dayRole: record.dayRole ?? DayRole.inferred(from: date),
                     kind: record.kind ?? .work,
                     note: record.note ?? ""
                 )
@@ -34,6 +35,7 @@ enum WorkScheduleStore {
                 day: dayKey(from: date),
                 startTime: timeText(hour: value.startHour, minute: value.startMinute),
                 endTime: timeText(hour: value.endHour, minute: value.endMinute),
+                dayRole: value.dayRole,
                 kind: value.kind,
                 note: value.note
             )
@@ -55,6 +57,7 @@ enum WorkScheduleStore {
         let metadata = "# calculationRuleID: \(ruleID)\n"
         let header = [
             "日期",
+            "日历角色",
             "类型",
             "内容",
             "上班时间",
@@ -134,6 +137,7 @@ enum WorkScheduleStore {
             let metrics = WorkCalculationEngine.metrics(date: date, schedule: schedule, ruleID: ruleID)
             let values = [
                 day,
+                schedule.dayRole.title,
                 schedule.kind.title,
                 schedule.displayText,
                 timeText(hour: schedule.startHour, minute: schedule.startMinute),
@@ -149,6 +153,7 @@ enum WorkScheduleStore {
 
         let values = [
             day,
+            schedule.dayRole.title,
             schedule.kind.title,
             schedule.displayText,
             "",

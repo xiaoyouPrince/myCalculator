@@ -3,13 +3,14 @@ import Foundation
 enum WorkCalculationRegistry {
     // Planned future rules:
     // - dinner-break-v2
-    // - rest-day-overtime
     // - compensatory-leave
 
     nonisolated private static let legacyTenHourRule = LegacyTenHourRule()
+    nonisolated private static let restDayOvertimeRule = RestDayOvertimeRule()
 
     nonisolated static let all: [any WorkCalculationRule] = [
-        legacyTenHourRule
+        legacyTenHourRule,
+        restDayOvertimeRule
     ]
 
     nonisolated static let defaultRuleID = WorkCalculationRuleID.default

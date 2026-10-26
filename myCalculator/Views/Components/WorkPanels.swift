@@ -2,6 +2,7 @@ import SwiftUI
 
 struct WorkTimeInputPanel: View {
     let targetDate: Date
+    @Binding var selectedDayRole: DayRole
     @Binding var selectedKind: WorkLogKind
     @Binding var customNote: String
     @Binding var workStartTime: Date
@@ -21,13 +22,27 @@ struct WorkTimeInputPanel: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: 14) {
             Text("设置记录")
                 .font(.title3.bold())
             Text(dateTitle)
                 .foregroundStyle(.secondary)
 
-            Picker("记录类型", selection: $selectedKind) {
+            HStack(alignment: .firstTextBaseline, spacing: 12) {
+                Picker("今天是什么日", selection: $selectedDayRole) {
+                    ForEach(DayRole.allCases) { role in
+                        Text(role.title).tag(role)
+                    }
+                }
+                .pickerStyle(.menu)
+
+                Button("按日历默认") {
+                    selectedDayRole = DayRole.inferred(from: targetDate)
+                }
+                .buttonStyle(.bordered)
+            }
+
+            Picker("实际做什么", selection: $selectedKind) {
                 ForEach(WorkLogKind.allCases) { kind in
                     Text(kind.title).tag(kind)
                 }
@@ -41,7 +56,7 @@ struct WorkTimeInputPanel: View {
                 TextField("输入自定义内容", text: $customNote)
                     .textFieldStyle(.roundedBorder)
             } else {
-                Text(selectedKind.title)
+                Text("\(selectedDayRole.title) · \(selectedKind.title)")
                     .font(.body.weight(.medium))
                     .foregroundStyle(.secondary)
             }
@@ -62,6 +77,7 @@ struct WorkTimeInputPanel: View {
 
 struct WorkDetailPanel: View {
     let targetDate: Date
+    let dayRole: DayRole
     let summary: MonthScheduleSummary
     let emphasizesEffectiveOvertime: Bool
     let onEdit: () -> Void
@@ -72,6 +88,8 @@ struct WorkDetailPanel: View {
             Text("当日详情")
                 .font(.title3.bold())
             Text(targetDate.formatted(.dateTime.year().month().day().weekday(.abbreviated)))
+                .foregroundStyle(.secondary)
+            Text("日历角色：\(dayRole.title)")
                 .foregroundStyle(.secondary)
 
             Divider()

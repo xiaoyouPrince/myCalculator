@@ -109,24 +109,29 @@ xcodebuild \
   build
 ```
 
-## 后续规则模板（未实现）
+## 已实现：休息日加班（`rest-day-overtime`）
 
-### 休息日加班（rest-day-overtime）
+实现文件：`Calculation/Rules/RestDayOvertimeRule.swift`。依据 **`schedule.dayRole`**（不是单纯看日历周末）：
 
-```swift
-func metrics(for context: WorkCalculationContext) -> WorkMetrics {
-    guard context.schedule.isWorkLog else { return zeroMetrics }
-    if isRestDay(context.date) {
-        // 全部出勤算加班，有效加班 = 0，可写入 extensions 供调休
-    } else {
-        // 沿用工作日逻辑
-    }
-}
-```
+| `dayRole` | 语义 |
+| --- | --- |
+| `workday` / `makeupWorkday` | 与 `legacy-ten-hour` 相同 |
+| `weekend` / `publicHoliday` | 出勤全部计 `overtimeHours`；`declaredWorkHours = 0`；有效加班仍用 ≥1 小时门槛与 0.5 取整 |
+
+对照用例（休息日角色，`09:00` 起）：
+
+| 下班 | 出勤小时 | 工时申报 | 加班 | 有效加班 |
+| --- | ---: | ---: | ---: | ---: |
+| 18:00 | 9.00 | 0.00 | 9.00 | 9.00 |
+| 12:00 | 3.00 | 0.00 | 3.00 | 3.00 |
+| 09:30 | 0.50 | 0.00 | 0.50 | 0.00 |
+| 20:00 | 11.00 | 0.00 | 11.00 | 11.00 |
+
+同一组上下班，若角色为工作日或调休补班，数值与 README「legacy-ten-hour」表一致。
 
 ### 浏览器扩展
 
-扩展目前固定使用 `legacy-ten-hour`（见「浏览器扩展自动填报」说明）。App 导出 CSV 首行会写入 `# calculationRuleID: ...`，便于后续同步。
+扩展目前固定使用 `legacy-ten-hour`，且极简 JSON **不含** `dayRole`（见「浏览器扩展自动填报」）。App 导出 CSV 含「日历角色」列，首行写入 `# calculationRuleID: ...`。
 
 自定义 JavaScript 规则引擎计划在 v2.x 实现。
 
@@ -134,8 +139,8 @@ func metrics(for context: WorkCalculationContext) -> WorkMetrics {
 
 | 版本 | 规则 id | 说明 |
 | --- | --- | --- |
-| 当前 | `legacy-ten-hour` | 10 小时阈值，与历史行为一致 |
-| v1.3 | `dinner-break-v2` | 晚饭语义扣减 |
-| v1.4 | `rest-day-overtime` | 周末 / 补班 / 法定日 |
-| v1.5 | `compensatory-leave` | 调休额度 |
+| 当前默认 | `legacy-ten-hour` | 10 小时阈值，与历史行为一致 |
+| 当前可选 | `rest-day-overtime` | 按 `dayRole` 区分休息日加班 |
+| 后续 | `dinner-break-v2` | 晚饭语义扣减 |
+| 后续 | `compensatory-leave` | 调休额度 |
 | v2.x | 脚本 / 导出同步 | App 与浏览器扩展共享规则 |

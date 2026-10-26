@@ -26,6 +26,47 @@ enum ScheduleExportScope {
     }
 }
 
+enum DayRole: String, Codable, CaseIterable, Identifiable {
+    case workday
+    case weekend
+    case publicHoliday
+    case makeupWorkday
+
+    var id: String { rawValue }
+
+    nonisolated var title: String {
+        switch self {
+        case .workday:
+            return "工作日"
+        case .weekend:
+            return "周末"
+        case .publicHoliday:
+            return "法定放假"
+        case .makeupWorkday:
+            return "调休补班"
+        }
+    }
+
+    /// 仅按系统日历推断工作日 / 周末；法定假与补班需手选。
+    nonisolated static func inferred(from date: Date, calendar: Calendar = .current) -> DayRole {
+        let weekday = calendar.component(.weekday, from: date)
+        if weekday == 1 || weekday == 7 {
+            return .weekend
+        }
+        return .workday
+    }
+
+    /// 休息日加班规则下：周末 / 法定假的出勤按休息日加班语义；工作日与调休补班按工作日语义。
+    nonisolated var treatsAttendanceAsRestDayOvertime: Bool {
+        switch self {
+        case .weekend, .publicHoliday:
+            return true
+        case .workday, .makeupWorkday:
+            return false
+        }
+    }
+}
+
 enum WorkLogKind: String, Codable, CaseIterable, Identifiable {
     case work
     case holiday
@@ -40,11 +81,31 @@ enum WorkLogKind: String, Codable, CaseIterable, Identifiable {
     nonisolated var title: String {
         switch self {
         case .work:
-            return "工作时间"
+            return "上班"
         case .holiday:
             return "放假"
         case .compensatoryLeave:
-            return "调休"
+            return "调休休息"
+        case .annualLeave:
+            return "年假"
+        case .sickLeave:
+            return "病假"
+        case .personalLeave:
+            return "事假"
+        case .custom:
+            return "自定义"
+        }
+    }
+
+    /// 月格等窄空间用的短标签。
+    nonisolated var shortTitle: String {
+        switch self {
+        case .work:
+            return "班"
+        case .holiday:
+            return "假"
+        case .compensatoryLeave:
+            return "休"
         case .annualLeave:
             return "年假"
         case .sickLeave:
@@ -62,6 +123,7 @@ struct WorkSchedule: Codable {
     let startMinute: Int
     let endHour: Int
     let endMinute: Int
+    let dayRole: DayRole
     let kind: WorkLogKind
     let note: String
 
@@ -82,6 +144,7 @@ struct WorkSchedule: Codable {
         startMinute: Int,
         endHour: Int,
         endMinute: Int,
+        dayRole: DayRole = .workday,
         kind: WorkLogKind = .work,
         note: String = ""
     ) {
@@ -89,12 +152,21 @@ struct WorkSchedule: Codable {
         self.startMinute = startMinute
         self.endHour = endHour
         self.endMinute = endMinute
+        self.dayRole = dayRole
         self.kind = kind
         self.note = note
     }
 
-    init(kind: WorkLogKind, note: String = "") {
-        self.init(startHour: 0, startMinute: 0, endHour: 0, endMinute: 0, kind: kind, note: note)
+    init(dayRole: DayRole, kind: WorkLogKind, note: String = "") {
+        self.init(
+            startHour: 0,
+            startMinute: 0,
+            endHour: 0,
+            endMinute: 0,
+            dayRole: dayRole,
+            kind: kind,
+            note: note
+        )
     }
 
     enum CodingKeys: String, CodingKey {
@@ -102,6 +174,7 @@ struct WorkSchedule: Codable {
         case startMinute
         case endHour
         case endMinute
+        case dayRole
         case kind
         case note
     }
@@ -112,6 +185,7 @@ struct WorkSchedule: Codable {
         startMinute = try container.decodeIfPresent(Int.self, forKey: .startMinute) ?? 0
         endHour = try container.decodeIfPresent(Int.self, forKey: .endHour) ?? 0
         endMinute = try container.decodeIfPresent(Int.self, forKey: .endMinute) ?? 0
+        dayRole = try container.decodeIfPresent(DayRole.self, forKey: .dayRole) ?? .workday
         kind = try container.decodeIfPresent(WorkLogKind.self, forKey: .kind) ?? .work
         note = try container.decodeIfPresent(String.self, forKey: .note) ?? ""
     }
@@ -171,6 +245,7 @@ struct WorkScheduleRecord: Codable {
     let day: String
     let startTime: String
     let endTime: String
+    let dayRole: DayRole?
     let kind: WorkLogKind?
     let note: String?
 
@@ -190,18 +265,29 @@ struct WorkScheduleRecord: Codable {
         WorkScheduleRecord.timeParts(from: endTime).minute
     }
 
-    init(day: String, startHour: Int, startMinute: Int, endHour: Int, endMinute: Int, kind: WorkLogKind?, note: String?) {
+    init(
+        day: String,
+        startHour: Int,
+        startMinute: Int,
+        endHour: Int,
+        endMinute: Int,
+        dayRole: DayRole?,
+        kind: WorkLogKind?,
+        note: String?
+    ) {
         self.day = day
         self.startTime = WorkScheduleRecord.timeText(hour: startHour, minute: startMinute)
         self.endTime = WorkScheduleRecord.timeText(hour: endHour, minute: endMinute)
+        self.dayRole = dayRole
         self.kind = kind
         self.note = note
     }
 
-    init(day: String, startTime: String, endTime: String, kind: WorkLogKind?, note: String?) {
+    init(day: String, startTime: String, endTime: String, dayRole: DayRole?, kind: WorkLogKind?, note: String?) {
         self.day = day
         self.startTime = startTime
         self.endTime = endTime
+        self.dayRole = dayRole
         self.kind = kind
         self.note = note
     }
@@ -214,6 +300,7 @@ struct WorkScheduleRecord: Codable {
         case startMinute
         case endHour
         case endMinute
+        case dayRole
         case kind
         case note
     }
@@ -221,6 +308,7 @@ struct WorkScheduleRecord: Codable {
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         day = try container.decode(String.self, forKey: .day)
+        dayRole = try container.decodeIfPresent(DayRole.self, forKey: .dayRole)
         kind = try container.decodeIfPresent(WorkLogKind.self, forKey: .kind)
         note = try container.decodeIfPresent(String.self, forKey: .note)
 
@@ -244,6 +332,7 @@ struct WorkScheduleRecord: Codable {
         try container.encode(day, forKey: .day)
         try container.encode(startTime, forKey: .startTime)
         try container.encode(endTime, forKey: .endTime)
+        try container.encodeIfPresent(dayRole, forKey: .dayRole)
         try container.encodeIfPresent(kind, forKey: .kind)
         try container.encodeIfPresent(note, forKey: .note)
     }

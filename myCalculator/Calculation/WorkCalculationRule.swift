@@ -27,5 +27,6 @@ enum NonWorkLogSummaryBuilder {
 
 enum WorkCalculationRuleID {
     static let legacyTenHour = "legacy-ten-hour"
+    static let restDayOvertime = "rest-day-overtime"
     static let `default` = legacyTenHour
 }

@@ -7,6 +7,7 @@ struct WeekView: View {
     @Environment(\.workCalculationRuleID) private var workCalculationRuleID
     @State private var selectedPanelDate: Date?
     @State private var isEditingTime = false
+    @State private var selectedDayRole: DayRole = .workday
     @State private var selectedKind: WorkLogKind = .work
     @State private var customNote = ""
     @State private var workStartTime: Date = WeekView.makeTime(hour: 9, minute: 0)
@@ -74,15 +75,17 @@ struct WeekView: View {
                     )
                     WorkDetailPanel(
                         targetDate: panelDate,
+                        dayRole: schedule.dayRole,
                         summary: summary,
                         emphasizesEffectiveOvertime: emphasizesEffectiveOvertime,
                         onEdit: { isEditingTime = true },
                         onClose: { selectedPanelDate = nil }
                     )
-                    .frame(width: 420, height: 320)
+                    .frame(width: 420, height: 340)
                 } else {
                     WorkTimeInputPanel(
                         targetDate: panelDate,
+                        selectedDayRole: $selectedDayRole,
                         selectedKind: $selectedKind,
                         customNote: $customNote,
                         workStartTime: $workStartTime,
@@ -97,7 +100,7 @@ struct WeekView: View {
                             selectedPanelDate = nil
                         }
                     )
-                    .frame(width: 360, height: 280)
+                    .frame(width: 380, height: 360)
                 }
             }
         }
@@ -146,6 +149,7 @@ struct WeekView: View {
     private func openPanel(for targetDate: Date) {
         let key = normalizedDay(targetDate)
         if let schedule = daySchedules[key] {
+            selectedDayRole = schedule.dayRole
             selectedKind = schedule.kind
             customNote = schedule.kind == .custom ? schedule.note : ""
             if schedule.isWorkLog {
@@ -157,6 +161,7 @@ struct WeekView: View {
             }
             isEditingTime = false
         } else {
+            selectedDayRole = DayRole.inferred(from: key)
             selectedKind = .work
             customNote = ""
             workStartTime = WeekView.makeTime(hour: 9, minute: 0)
@@ -183,11 +188,14 @@ struct WeekView: View {
                 startHour: Calendar.current.component(.hour, from: workStartTime),
                 startMinute: Calendar.current.component(.minute, from: workStartTime),
                 endHour: Calendar.current.component(.hour, from: workEndTime),
-                endMinute: Calendar.current.component(.minute, from: workEndTime)
+                endMinute: Calendar.current.component(.minute, from: workEndTime),
+                dayRole: selectedDayRole,
+                kind: .work
             )
         }
 
         return WorkSchedule(
+            dayRole: selectedDayRole,
             kind: selectedKind,
             note: selectedKind == .custom ? customNote.trimmingCharacters(in: .whitespacesAndNewlines) : ""
         )

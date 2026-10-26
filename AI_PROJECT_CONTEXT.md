@@ -69,6 +69,8 @@ Then capture the app window, not the full desktop, and compare against the user 
 | SwiftUI/UIKit article | `docs/swiftui-uikit-mental-models.md` |
 | Browser extension docs | `docs/browser-extension-autofill.md` |
 | Browser extension source | `browser-extension/` |
+| R&D journal (lean) | `docs/rd-log.md` |
+| Requirements index | `docs/requirements/README.md` |
 
 ## Documentation Maintenance
 

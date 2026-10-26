@@ -8,6 +8,7 @@ struct MonthView: View {
     private let weekDayTitles = ["一", "二", "三", "四", "五", "六", "日"]
     @State private var selectedPanelDate: Date?
     @State private var isEditingTime = false
+    @State private var selectedDayRole: DayRole = .workday
     @State private var selectedKind: WorkLogKind = .work
     @State private var customNote = ""
     @State private var workStartTime: Date = MonthView.makeTime(hour: 9, minute: 0)
@@ -74,15 +75,17 @@ struct MonthView: View {
                     )
                     WorkDetailPanel(
                         targetDate: panelDate,
+                        dayRole: schedule.dayRole,
                         summary: summary,
                         emphasizesEffectiveOvertime: emphasizesEffectiveOvertime,
                         onEdit: { isEditingTime = true },
                         onClose: { selectedPanelDate = nil }
                     )
-                    .frame(width: 420, height: 320)
+                    .frame(width: 420, height: 340)
                 } else {
                     WorkTimeInputPanel(
                         targetDate: panelDate,
+                        selectedDayRole: $selectedDayRole,
                         selectedKind: $selectedKind,
                         customNote: $customNote,
                         workStartTime: $workStartTime,
@@ -97,7 +100,7 @@ struct MonthView: View {
                             selectedPanelDate = nil
                         }
                     )
-                    .frame(width: 360, height: 280)
+                    .frame(width: 380, height: 360)
                 }
             }
         }
@@ -115,10 +118,12 @@ struct MonthView: View {
     private func weekRow(_ week: MonthWeek, cellHeight: CGFloat) -> some View {
         MonthWeekNumberCell(weekNumber: week.weekOfYear, cellHeight: cellHeight)
         ForEach(week.days) { day in
+            let key = normalizedDay(day.id)
             MonthDayCell(
                 day: day,
                 displayedMonthDate: date,
                 cellHeight: cellHeight,
+                schedule: daySchedules[key],
                 scheduleSummary: scheduleSummary(for: day.id),
                 emphasizesEffectiveOvertime: emphasizesEffectiveOvertime,
                 onTap: { openPanel(for: day.id) }
@@ -129,6 +134,7 @@ struct MonthView: View {
     private func openPanel(for targetDate: Date) {
         let key = normalizedDay(targetDate)
         if let schedule = daySchedules[key] {
+            selectedDayRole = schedule.dayRole
             selectedKind = schedule.kind
             customNote = schedule.kind == .custom ? schedule.note : ""
             if schedule.isWorkLog {
@@ -140,6 +146,7 @@ struct MonthView: View {
             }
             isEditingTime = false
         } else {
+            selectedDayRole = DayRole.inferred(from: key)
             selectedKind = .work
             customNote = ""
             workStartTime = MonthView.makeTime(hour: 9, minute: 0)
@@ -260,11 +267,14 @@ struct MonthView: View {
                 startHour: Calendar.current.component(.hour, from: workStartTime),
                 startMinute: Calendar.current.component(.minute, from: workStartTime),
                 endHour: Calendar.current.component(.hour, from: workEndTime),
-                endMinute: Calendar.current.component(.minute, from: workEndTime)
+                endMinute: Calendar.current.component(.minute, from: workEndTime),
+                dayRole: selectedDayRole,
+                kind: .work
             )
         }
 
         return WorkSchedule(
+            dayRole: selectedDayRole,
             kind: selectedKind,
             note: selectedKind == .custom ? customNote.trimmingCharacters(in: .whitespacesAndNewlines) : ""
         )
@@ -306,37 +316,45 @@ struct MonthDayCell: View {
     let day: MonthDay
     let displayedMonthDate: Date
     let cellHeight: CGFloat
+    let schedule: WorkSchedule?
     let scheduleSummary: MonthScheduleSummary?
     let emphasizesEffectiveOvertime: Bool
     let onTap: () -> Void
 
     var body: some View {
         Button(action: onTap) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text("\(day.day)")
-                    .font(.subheadline)
-                    .foregroundStyle(isInDisplayedMonth ? Color.black.opacity(0.82) : Color.secondary.opacity(0.45))
-                    .padding(.top, 8)
-                    .padding(.leading, 8)
+            ZStack(alignment: .topTrailing) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("\(day.day)")
+                        .font(.subheadline)
+                        .foregroundStyle(isInDisplayedMonth ? Color.black.opacity(0.82) : Color.secondary.opacity(0.45))
+                        .padding(.top, 8)
+                        .padding(.leading, 8)
 
-                if let summary = scheduleSummary {
-                    VStack(alignment: .leading, spacing: 2) {
-                        ForEach(summary.lines, id: \.self) { line in
-                            WorkSummaryLineText(
-                                line: line,
-                                emphasizesEffectiveOvertime: emphasizesEffectiveOvertime,
-                                defaultColor: summaryForegroundStyle
-                            )
-                        }
-                    }
-                    .font(.caption2)
-                    .lineLimit(1)
-                    .padding(.horizontal, 8)
+                    cellContent
+                        .font(.caption2)
+                        .lineLimit(1)
+                        .padding(.horizontal, 8)
+
+                    Spacer(minLength: 0)
                 }
-                Spacer()
+                .frame(maxWidth: .infinity, minHeight: cellHeight, alignment: .topLeading)
+
+                if let badge = roleBadgeText {
+                    Text(badge)
+                        .font(.system(size: 9, weight: .semibold))
+                        .foregroundStyle(badgeForeground)
+                        .padding(.horizontal, 4)
+                        .padding(.vertical, 2)
+                        .background(
+                            Capsule()
+                                .fill(badgeBackground)
+                        )
+                        .padding(.top, 6)
+                        .padding(.trailing, 6)
+                }
             }
-            .frame(maxWidth: .infinity, minHeight: cellHeight, alignment: .topLeading)
-            .background(day.isToday && isInDisplayedMonth ? Color.blue.opacity(0.14) : Color.clear)
+            .background(cellBackground)
             .overlay(
                 Rectangle()
                     .stroke(Color.gray.opacity(0.15), lineWidth: 0.5)
@@ -347,16 +365,108 @@ struct MonthDayCell: View {
         .contentShape(Rectangle())
     }
 
+    @ViewBuilder
+    private var cellContent: some View {
+        if let schedule {
+            if schedule.isWorkLog, let summary = scheduleSummary {
+                VStack(alignment: .leading, spacing: 2) {
+                    ForEach(summary.lines, id: \.self) { line in
+                        WorkSummaryLineText(
+                            line: line,
+                            emphasizesEffectiveOvertime: emphasizesEffectiveOvertime,
+                            defaultColor: summaryForegroundStyle
+                        )
+                    }
+                }
+            } else {
+                Text(nonWorkShortLabel(for: schedule))
+                    .foregroundStyle(summaryForegroundStyle)
+            }
+        }
+    }
+
     private var isInDisplayedMonth: Bool {
         let calendar = Calendar.current
         return calendar.component(.year, from: day.id) == calendar.component(.year, from: displayedMonthDate) &&
             calendar.component(.month, from: day.id) == calendar.component(.month, from: displayedMonthDate)
     }
 
+    private var resolvedDayRole: DayRole {
+        schedule?.dayRole ?? DayRole.inferred(from: day.id)
+    }
+
     private var summaryForegroundStyle: Color {
         guard isInDisplayedMonth else {
             return Color.secondary.opacity(0.45)
         }
-        return scheduleSummary?.isWorkLog == true ? .blue : .secondary
+        return schedule?.isWorkLog == true ? .blue : .secondary
+    }
+
+    private var cellBackground: Color {
+        let todayBoost = day.isToday && isInDisplayedMonth
+        let roleTint = roleBackgroundTint
+        let monthFactor: Double = isInDisplayedMonth ? 1.0 : 0.45
+
+        if todayBoost {
+            return Color.blue.opacity(0.14)
+        }
+        return roleTint.opacity(roleTintOpacity * monthFactor)
+    }
+
+    private var roleBackgroundTint: Color {
+        switch resolvedDayRole {
+        case .workday:
+            return .clear
+        case .weekend:
+            return Color.gray
+        case .publicHoliday:
+            return Color.orange
+        case .makeupWorkday:
+            return Color.teal
+        }
+    }
+
+    private var roleTintOpacity: Double {
+        switch resolvedDayRole {
+        case .workday:
+            return 0
+        case .weekend:
+            return schedule == nil ? 0.08 : 0.10
+        case .publicHoliday:
+            return 0.12
+        case .makeupWorkday:
+            return 0.12
+        }
+    }
+
+    /// 周末加班 / 法定假上班 / 调休补班 的角标。
+    private var roleBadgeText: String? {
+        guard let schedule, schedule.isWorkLog, isInDisplayedMonth else { return nil }
+        switch schedule.dayRole {
+        case .weekend:
+            return "加"
+        case .publicHoliday:
+            return "假加"
+        case .makeupWorkday:
+            return "补"
+        case .workday:
+            return nil
+        }
+    }
+
+    private var badgeForeground: Color {
+        isInDisplayedMonth ? Color.primary.opacity(0.75) : Color.secondary.opacity(0.45)
+    }
+
+    private var badgeBackground: Color {
+        Color.primary.opacity(isInDisplayedMonth ? 0.08 : 0.04)
+    }
+
+    private func nonWorkShortLabel(for schedule: WorkSchedule) -> String {
+        if schedule.kind == .custom {
+            let trimmed = schedule.note.trimmingCharacters(in: .whitespacesAndNewlines)
+            return trimmed.isEmpty ? schedule.kind.shortTitle : trimmed
+        }
+        return schedule.kind.shortTitle
     }
 }
