@@ -155,7 +155,7 @@ struct WeekView: View {
             }
             isEditingTime = false
         } else {
-            selectedKind = .work
+            selectedKind = WorkLogKind.defaultKind(for: key)
             workStartTime = WeekView.makeTime(hour: 9, minute: 0)
             workEndTime = WeekView.makeTime(hour: 18, minute: 0)
             isEditingTime = true

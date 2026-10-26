@@ -9,9 +9,10 @@
 2. `/Users/quxiaoyou/Documents/AI/AI协作问题复盘与实践指南.md`
 3. `README.md`
 4. `docs/help-index.md`
-5. `docs/month-view-rendering-postmortem.md` when touching month view, date rendering, SwiftUI identity, or visual state
-6. `docs/swiftui-uikit-mental-models.md` when touching complex SwiftUI view identity or lazy containers
-7. `docs/browser-extension-autofill.md` when changing export data or browser-extension-related behavior
+5. `docs/attendance-and-overtime-rules.md` when touching attendance kinds, overtime pay, compensatory leave, or `LegacyTenHourRule`
+6. `docs/month-view-rendering-postmortem.md` when touching month view, date rendering, SwiftUI identity, or visual state
+7. `docs/swiftui-uikit-mental-models.md` when touching complex SwiftUI view identity or lazy containers
+8. `docs/browser-extension-autofill.md` when changing export data or browser-extension-related behavior
 
 ## Project Shape
 
@@ -71,7 +72,8 @@ Then capture the app window, not the full desktop, and compare against the user 
 | Browser extension source | `browser-extension/` |
 | R&D journal (lean) | `docs/rd-log.md` |
 | Requirements index | `docs/requirements/README.md` |
-| Current attendance model | `docs/requirements/REQ-004-simple-attendance-model.md` |
+| Attendance / OT knowledge base | `docs/attendance-and-overtime-rules.md` |
+| REQ-004 (attendance pivot) | `docs/requirements/REQ-004-simple-attendance-model.md` |
 
 ## Documentation Maintenance
 

@@ -80,7 +80,7 @@ struct DayView: View {
                 workEndTime = DayView.makeTime(hour: 18, minute: 0)
             }
         } else {
-            selectedKind = .work
+            selectedKind = WorkLogKind.defaultKind(for: key)
             workStartTime = DayView.makeTime(hour: 9, minute: 0)
             workEndTime = DayView.makeTime(hour: 18, minute: 0)
         }

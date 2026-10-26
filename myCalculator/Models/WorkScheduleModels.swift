@@ -26,9 +26,12 @@ enum ScheduleExportScope {
     }
 }
 
-/// 简洁出勤类型：不上班，或上班三类之一。
+/// 简洁出勤类型。
+/// - 工作日常用：正常上班 / 不上班
+/// - 休息日常用：补班 / 加班 / 换调休 / 不上班
 enum WorkLogKind: String, Codable, CaseIterable, Identifiable {
     case work
+    case makeupWork
     case weekendOvertime
     case weekendCompensatory
     case off
@@ -39,10 +42,12 @@ enum WorkLogKind: String, Codable, CaseIterable, Identifiable {
         switch self {
         case .work:
             return "正常上班"
+        case .makeupWork:
+            return "补班"
         case .weekendOvertime:
-            return "周末加班"
+            return "加班"
         case .weekendCompensatory:
-            return "周末调休"
+            return "换调休"
         case .off:
             return "不上班"
         }
@@ -51,6 +56,8 @@ enum WorkLogKind: String, Codable, CaseIterable, Identifiable {
     nonisolated var shortTitle: String {
         switch self {
         case .work:
+            return "班"
+        case .makeupWork:
             return "班"
         case .weekendOvertime:
             return "加"
@@ -65,6 +72,22 @@ enum WorkLogKind: String, Codable, CaseIterable, Identifiable {
         self != .off
     }
 
+    /// 按日历日给出录入选项（周六日默认当休息日）。
+    nonisolated static func pickerCases(for date: Date, calendar: Calendar = .current) -> [WorkLogKind] {
+        let weekday = calendar.component(.weekday, from: date)
+        let isWeekend = weekday == 1 || weekday == 7
+        if isWeekend {
+            return [.makeupWork, .weekendOvertime, .weekendCompensatory, .off]
+        }
+        return [.work, .off]
+    }
+
+    nonisolated static func defaultKind(for date: Date, calendar: Calendar = .current) -> WorkLogKind {
+        let weekday = calendar.component(.weekday, from: date)
+        let isWeekend = weekday == 1 || weekday == 7
+        return isWeekend ? .off : .work
+    }
+
     /// 兼容旧 JSON：请假类 → 不上班；未知 → 正常上班。
     init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
@@ -72,6 +95,8 @@ enum WorkLogKind: String, Codable, CaseIterable, Identifiable {
         switch raw {
         case Self.work.rawValue:
             self = .work
+        case Self.makeupWork.rawValue:
+            self = .makeupWork
         case Self.weekendOvertime.rawValue:
             self = .weekendOvertime
         case Self.weekendCompensatory.rawValue:
@@ -92,6 +117,8 @@ enum WorkLogKind: String, Codable, CaseIterable, Identifiable {
             return base
         }
         switch legacyDayRoleRaw {
+        case "makeupWorkday":
+            return .makeupWork
         case "weekend", "publicHoliday":
             return .weekendOvertime
         default:

@@ -140,7 +140,7 @@ struct MonthView: View {
             }
             isEditingTime = false
         } else {
-            selectedKind = .work
+            selectedKind = WorkLogKind.defaultKind(for: key)
             workStartTime = MonthView.makeTime(hour: 9, minute: 0)
             workEndTime = MonthView.makeTime(hour: 18, minute: 0)
             isEditingTime = true
@@ -355,20 +355,11 @@ struct MonthDayCell: View {
     private var cellContent: some View {
         if let schedule {
             if schedule.isWorkLog, let summary = scheduleSummary {
+                // 恢复完整摘要行（时间、时长、申报、加班、有效加班、调休等）
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(summary.timeRangeText)
-                        .foregroundStyle(summaryForegroundStyle)
-                    WorkSummaryLineText(
-                        line: summary.declaredWorkHoursText,
-                        emphasizesEffectiveOvertime: emphasizesEffectiveOvertime,
-                        defaultColor: summaryForegroundStyle
-                    )
-                    if schedule.kind == .weekendCompensatory {
-                        Text(summary.compensatoryLeaveText)
-                            .foregroundStyle(summaryForegroundStyle)
-                    } else {
+                    ForEach(summary.lines, id: \.self) { line in
                         WorkSummaryLineText(
-                            line: summary.effectiveOvertimeText,
+                            line: line,
                             emphasizesEffectiveOvertime: emphasizesEffectiveOvertime,
                             defaultColor: summaryForegroundStyle
                         )
@@ -413,6 +404,8 @@ struct MonthDayCell: View {
     private var kindBadgeText: String? {
         guard let schedule, schedule.isWorkLog, isInDisplayedMonth else { return nil }
         switch schedule.kind {
+        case .makeupWork:
+            return "班" // 补班按正常工作统计，角标与「班」一致，避免和加班混淆
         case .weekendOvertime:
             return "加"
         case .weekendCompensatory:

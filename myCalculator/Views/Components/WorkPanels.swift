@@ -23,7 +23,7 @@ struct WorkTimeInputPanel: View {
                 .foregroundStyle(.secondary)
 
             Picker("出勤", selection: $selectedKind) {
-                ForEach(WorkLogKind.allCases) { kind in
+                ForEach(pickerKinds) { kind in
                     Text(kind.title).tag(kind)
                 }
             }
@@ -37,7 +37,7 @@ struct WorkTimeInputPanel: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
             } else {
-                Text("不上班：不记录时间与工时")
+                Text("不上班：不记录时间与工时（周六日默认休息）")
                     .font(.body.weight(.medium))
                     .foregroundStyle(.secondary)
             }
@@ -54,14 +54,25 @@ struct WorkTimeInputPanel: View {
         .padding(20)
     }
 
+    private var pickerKinds: [WorkLogKind] {
+        var kinds = WorkLogKind.pickerCases(for: targetDate)
+        // 已有记录若不在当日默认选项里（例如工作日记了加班），仍保留当前选中项以便编辑。
+        if !kinds.contains(selectedKind) {
+            kinds.insert(selectedKind, at: 0)
+        }
+        return kinds
+    }
+
     private var kindHint: String {
         switch selectedKind {
         case .work:
             return "工时申报与加班按正常工作日规则统计"
+        case .makeupWork:
+            return "补班：按正常工作日规则统计（与正常上班相同）"
         case .weekendOvertime:
-            return "工时申报与加班均按正常工作日规则（计入加班工资）"
+            return "休息日加班工资：出勤全计加班；<10h 扣午饭 1h，>10h 再扣晚饭共 2h"
         case .weekendCompensatory:
-            return "工时申报照常；不计加班工资，超额记入调休额度"
+            return "换调休：不计加班工资；调休额度=出勤小时，若覆盖 12:00–13:00 再扣 1 小时"
         case .off:
             return ""
         }
