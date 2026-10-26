@@ -32,11 +32,10 @@ App 负责记录本地工时数据，浏览器扩展负责把这些数据填到�
 - `startTime`：上班时间，格式为 `HH:mm`。
 - `endTime`：下班时间，格式为 `HH:mm`。
 
-**与 App `dayRole` 的兼容策略（当前）：**
+**与 App 出勤类型的兼容策略（当前）：**
 
-- 极简 JSON **故意不包含** `dayRole`，扩展填报仍只认时间段 / 按 `legacy-ten-hour` 算申报小时。
-- App 本地 JSON、CSV 已含日历角色；需要按休息日加班核对时，请在 App 切换到 `rest-day-overtime` 规则，并以 App / CSV 为准。
-- 扩展若日后消费 `dayRole`，再扩展 JSON 字段并做缺省回退（缺省按工作日）。
+- 极简 JSON 仍只含时间段，扩展按 `legacy-ten-hour` 算申报小时，**不区分**「周末加班 / 周末调休」。
+- 加班工资账与调休额度以 App 侧栏及 CSV（含「调休额度」列）为准。
 
 ## 安装方式
 
@@ -71,7 +70,7 @@ App 负责记录本地工时数据，浏览器扩展负责把这些数据填到�
 
 ## 工时申报规则
 
-扩展中的工时计算逻辑需要和 App 保持一致。**App 可在工具栏切换全局计算规则**（含 `legacy-ten-hour`、`rest-day-overtime`）；扩展目前仍固定使用 `legacy-ten-hour`，且忽略日历角色。若 App 选择了 `rest-day-overtime` 或其他规则，扩展的填报数值可能与 App 不一致，请以 App 与 CSV 导出结果为准。
+扩展中的工时计算逻辑需要和 App 申报规则对齐。扩展目前固定使用 `legacy-ten-hour` 的申报公式，且不消费出勤类型；周末调休的「不计加班、记调休」仅在 App / CSV 体现。
 
 App 导出 CSV 时，首行会写入当前规则 id，例如：
 

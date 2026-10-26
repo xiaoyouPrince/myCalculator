@@ -71,6 +71,7 @@ Then capture the app window, not the full desktop, and compare against the user 
 | Browser extension source | `browser-extension/` |
 | R&D journal (lean) | `docs/rd-log.md` |
 | Requirements index | `docs/requirements/README.md` |
+| Current attendance model | `docs/requirements/REQ-004-simple-attendance-model.md` |
 
 ## Documentation Maintenance
 

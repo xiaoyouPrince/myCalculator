@@ -15,13 +15,16 @@ enum WorkScheduleStore {
         var result: [Date: WorkSchedule] = [:]
         for record in records {
             if let date = fromDayKey(record.day) {
+                let kind = WorkLogKind.migrated(
+                    fromLegacyKind: record.kind,
+                    legacyDayRoleRaw: record.legacyDayRoleRaw
+                )
                 result[date] = WorkSchedule(
                     startHour: record.startHour,
                     startMinute: record.startMinute,
                     endHour: record.endHour,
                     endMinute: record.endMinute,
-                    dayRole: record.dayRole ?? DayRole.inferred(from: date),
-                    kind: record.kind ?? .work,
+                    kind: kind,
                     note: record.note ?? ""
                 )
             }
@@ -35,7 +38,6 @@ enum WorkScheduleStore {
                 day: dayKey(from: date),
                 startTime: timeText(hour: value.startHour, minute: value.startMinute),
                 endTime: timeText(hour: value.endHour, minute: value.endMinute),
-                dayRole: value.dayRole,
                 kind: value.kind,
                 note: value.note
             )
@@ -57,7 +59,6 @@ enum WorkScheduleStore {
         let metadata = "# calculationRuleID: \(ruleID)\n"
         let header = [
             "日期",
-            "日历角色",
             "类型",
             "内容",
             "上班时间",
@@ -66,7 +67,8 @@ enum WorkScheduleStore {
             "工作小时",
             "工时申报",
             "加班时长",
-            "有效加班"
+            "有效加班",
+            "调休额度"
         ]
 
         let rows = schedules
@@ -137,7 +139,6 @@ enum WorkScheduleStore {
             let metrics = WorkCalculationEngine.metrics(date: date, schedule: schedule, ruleID: ruleID)
             let values = [
                 day,
-                schedule.dayRole.title,
                 schedule.kind.title,
                 schedule.displayText,
                 timeText(hour: schedule.startHour, minute: schedule.startMinute),
@@ -146,16 +147,17 @@ enum WorkScheduleStore {
                 String(format: "%.2f", Double(metrics.workMinutes) / 60.0),
                 String(format: "%.2f", metrics.declaredWorkHours),
                 String(format: "%.2f", metrics.overtimeHours),
-                String(format: "%.2f", metrics.effectiveOvertimeHours)
+                String(format: "%.2f", metrics.effectiveOvertimeHours),
+                String(format: "%.2f", metrics.compensatoryLeaveHours)
             ]
             return values.map(csvField).joined(separator: ",")
         }
 
         let values = [
             day,
-            schedule.dayRole.title,
             schedule.kind.title,
             schedule.displayText,
+            "",
             "",
             "",
             "",

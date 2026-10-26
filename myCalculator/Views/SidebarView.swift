@@ -45,6 +45,7 @@ struct SidebarView: View {
                                 Text("周工时申报 \(String(format: "%.2f", summary.declaredWorkHours)) 小时")
                                 Text("周加班时长 \(String(format: "%.2f", summary.overtimeHours)) 小时")
                                 Text("周有效加班 \(String(format: "%.2f", summary.effectiveOvertimeHours)) 小时")
+                                Text("周调休额度 \(String(format: "%.2f", summary.compensatoryLeaveHours)) 小时")
                             } else {
                                 Text("当周暂无记录")
                                     .foregroundStyle(.secondary)
@@ -62,6 +63,7 @@ struct SidebarView: View {
                                 Text("月工时申报 \(String(format: "%.2f", summary.declaredWorkHours)) 小时")
                                 Text("月加班时长 \(String(format: "%.2f", summary.overtimeHours)) 小时")
                                 Text("月有效加班 \(String(format: "%.2f", summary.effectiveOvertimeHours)) 小时")
+                                Text("月调休额度 \(String(format: "%.2f", summary.compensatoryLeaveHours)) 小时")
                             } else {
                                 Text("当月暂无记录")
                                     .foregroundStyle(.secondary)

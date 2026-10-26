@@ -61,16 +61,17 @@ struct DinnerBreakRule: WorkCalculationRule {
 - `date`：记录所属日历日。当前默认规则不使用，后续「周末 / 补班 / 法定日」规则会用到。
 - `schedule`：上下班时间与记录类型。
 
-### WorkMetrics 四字段
+### WorkMetrics 字段
 
 | 字段 | 含义 |
 | --- | --- |
 | `workMinutes` | 原始工作分钟 |
-| `declaredWorkHours` | 工时申报 |
-| `overtimeHours` | 加班时长 |
+| `declaredWorkHours` | 工时申报（项目人力，三类上班都算） |
+| `overtimeHours` | 加班时长（加班工资账） |
 | `effectiveOvertimeHours` | 有效加班（年视图、侧边栏高亮用） |
+| `compensatoryLeaveHours` | 调休额度（仅「周末调休」；供以后请假） |
 
-非工作记录（放假、调休、年假等）四项均为 `0`。
+不上班各项为 `0`。
 
 ### MonthScheduleSummary
 
@@ -109,38 +110,25 @@ xcodebuild \
   build
 ```
 
-## 已实现：休息日加班（`rest-day-overtime`）
+## 出勤类型与默认规则（`legacy-ten-hour`）
 
-实现文件：`Calculation/Rules/RestDayOvertimeRule.swift`。依据 **`schedule.dayRole`**（不是单纯看日历周末）：
+录入只有四类：`正常上班` / `周末加班` / `周末调休` / `不上班`（见 REQ-004）。
 
-| `dayRole` | 语义 |
-| --- | --- |
-| `workday` / `makeupWorkday` | 与 `legacy-ten-hour` 相同 |
-| `weekend` / `publicHoliday` | 出勤全部计 `overtimeHours`；`declaredWorkHours = 0`；有效加班仍用 ≥1 小时门槛与 0.5 取整 |
+同一组上下班（如 `09:00–20:00`）：
 
-对照用例（休息日角色，`09:00` 起）：
-
-| 下班 | 出勤小时 | 工时申报 | 加班 | 有效加班 |
+| 类型 | 工时申报 | 加班 | 有效加班 | 调休额度 |
 | --- | ---: | ---: | ---: | ---: |
-| 18:00 | 9.00 | 0.00 | 9.00 | 9.00 |
-| 12:00 | 3.00 | 0.00 | 3.00 | 3.00 |
-| 09:30 | 0.50 | 0.00 | 0.50 | 0.00 |
-| 20:00 | 11.00 | 0.00 | 11.00 | 11.00 |
-
-同一组上下班，若角色为工作日或调休补班，数值与 README「legacy-ten-hour」表一致。
+| 正常上班 / 周末加班 | 9.00 | 1.00 | 1.00 | 0 |
+| 周末调休 | 9.00 | 0 | 0 | 1.00（本应按规则算出的加班） |
 
 ### 浏览器扩展
 
-扩展目前固定使用 `legacy-ten-hour`，且极简 JSON **不含** `dayRole`（见「浏览器扩展自动填报」）。App 导出 CSV 含「日历角色」列，首行写入 `# calculationRuleID: ...`。
-
-自定义 JavaScript 规则引擎计划在 v2.x 实现。
+扩展仍固定 `legacy-ten-hour` 算申报小时，极简 JSON 仅 `day` / `startTime` / `endTime`。CSV 含类型与调休额度列；App 侧栏可看周/月调休合计。
 
 ## 路线图
 
 | 版本 | 规则 id | 说明 |
 | --- | --- | --- |
-| 当前默认 | `legacy-ten-hour` | 10 小时阈值，与历史行为一致 |
-| 当前可选 | `rest-day-overtime` | 按 `dayRole` 区分休息日加班 |
+| 当前默认 | `legacy-ten-hour` | 含三类上班分账逻辑 |
 | 后续 | `dinner-break-v2` | 晚饭语义扣减 |
-| 后续 | `compensatory-leave` | 调休额度 |
 | v2.x | 脚本 / 导出同步 | App 与浏览器扩展共享规则 |

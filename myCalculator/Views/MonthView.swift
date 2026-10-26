@@ -8,9 +8,7 @@ struct MonthView: View {
     private let weekDayTitles = ["一", "二", "三", "四", "五", "六", "日"]
     @State private var selectedPanelDate: Date?
     @State private var isEditingTime = false
-    @State private var selectedDayRole: DayRole = .workday
     @State private var selectedKind: WorkLogKind = .work
-    @State private var customNote = ""
     @State private var workStartTime: Date = MonthView.makeTime(hour: 9, minute: 0)
     @State private var workEndTime: Date = MonthView.makeTime(hour: 18, minute: 0)
 
@@ -75,7 +73,7 @@ struct MonthView: View {
                     )
                     WorkDetailPanel(
                         targetDate: panelDate,
-                        dayRole: schedule.dayRole,
+                        kind: schedule.kind,
                         summary: summary,
                         emphasizesEffectiveOvertime: emphasizesEffectiveOvertime,
                         onEdit: { isEditingTime = true },
@@ -85,9 +83,7 @@ struct MonthView: View {
                 } else {
                     WorkTimeInputPanel(
                         targetDate: panelDate,
-                        selectedDayRole: $selectedDayRole,
                         selectedKind: $selectedKind,
-                        customNote: $customNote,
                         workStartTime: $workStartTime,
                         workEndTime: $workEndTime,
                         onSave: {
@@ -100,7 +96,7 @@ struct MonthView: View {
                             selectedPanelDate = nil
                         }
                     )
-                    .frame(width: 380, height: 360)
+                    .frame(width: 380, height: 320)
                 }
             }
         }
@@ -134,9 +130,7 @@ struct MonthView: View {
     private func openPanel(for targetDate: Date) {
         let key = normalizedDay(targetDate)
         if let schedule = daySchedules[key] {
-            selectedDayRole = schedule.dayRole
             selectedKind = schedule.kind
-            customNote = schedule.kind == .custom ? schedule.note : ""
             if schedule.isWorkLog {
                 workStartTime = MonthView.makeTime(hour: schedule.startHour, minute: schedule.startMinute)
                 workEndTime = MonthView.makeTime(hour: schedule.endHour, minute: schedule.endMinute)
@@ -146,9 +140,7 @@ struct MonthView: View {
             }
             isEditingTime = false
         } else {
-            selectedDayRole = DayRole.inferred(from: key)
             selectedKind = .work
-            customNote = ""
             workStartTime = MonthView.makeTime(hour: 9, minute: 0)
             workEndTime = MonthView.makeTime(hour: 18, minute: 0)
             isEditingTime = true
@@ -262,22 +254,16 @@ struct MonthView: View {
     }
 
     private func makeScheduleFromEditor() -> WorkSchedule {
-        if selectedKind == .work {
+        if selectedKind.isWorkLog {
             return WorkSchedule(
                 startHour: Calendar.current.component(.hour, from: workStartTime),
                 startMinute: Calendar.current.component(.minute, from: workStartTime),
                 endHour: Calendar.current.component(.hour, from: workEndTime),
                 endMinute: Calendar.current.component(.minute, from: workEndTime),
-                dayRole: selectedDayRole,
-                kind: .work
+                kind: selectedKind
             )
         }
-
-        return WorkSchedule(
-            dayRole: selectedDayRole,
-            kind: selectedKind,
-            note: selectedKind == .custom ? customNote.trimmingCharacters(in: .whitespacesAndNewlines) : ""
-        )
+        return WorkSchedule(kind: .off)
     }
 }
 
@@ -340,7 +326,7 @@ struct MonthDayCell: View {
                 }
                 .frame(maxWidth: .infinity, minHeight: cellHeight, alignment: .topLeading)
 
-                if let badge = roleBadgeText {
+                if let badge = kindBadgeText {
                     Text(badge)
                         .font(.system(size: 9, weight: .semibold))
                         .foregroundStyle(badgeForeground)
@@ -370,16 +356,26 @@ struct MonthDayCell: View {
         if let schedule {
             if schedule.isWorkLog, let summary = scheduleSummary {
                 VStack(alignment: .leading, spacing: 2) {
-                    ForEach(summary.lines, id: \.self) { line in
+                    Text(summary.timeRangeText)
+                        .foregroundStyle(summaryForegroundStyle)
+                    WorkSummaryLineText(
+                        line: summary.declaredWorkHoursText,
+                        emphasizesEffectiveOvertime: emphasizesEffectiveOvertime,
+                        defaultColor: summaryForegroundStyle
+                    )
+                    if schedule.kind == .weekendCompensatory {
+                        Text(summary.compensatoryLeaveText)
+                            .foregroundStyle(summaryForegroundStyle)
+                    } else {
                         WorkSummaryLineText(
-                            line: line,
+                            line: summary.effectiveOvertimeText,
                             emphasizesEffectiveOvertime: emphasizesEffectiveOvertime,
                             defaultColor: summaryForegroundStyle
                         )
                     }
                 }
             } else {
-                Text(nonWorkShortLabel(for: schedule))
+                Text(schedule.kind.shortTitle)
                     .foregroundStyle(summaryForegroundStyle)
             }
         }
@@ -391,8 +387,9 @@ struct MonthDayCell: View {
             calendar.component(.month, from: day.id) == calendar.component(.month, from: displayedMonthDate)
     }
 
-    private var resolvedDayRole: DayRole {
-        schedule?.dayRole ?? DayRole.inferred(from: day.id)
+    private var isCalendarWeekend: Bool {
+        let weekday = Calendar.current.component(.weekday, from: day.id)
+        return weekday == 1 || weekday == 7
     }
 
     private var summaryForegroundStyle: Color {
@@ -403,53 +400,24 @@ struct MonthDayCell: View {
     }
 
     private var cellBackground: Color {
-        let todayBoost = day.isToday && isInDisplayedMonth
-        let roleTint = roleBackgroundTint
-        let monthFactor: Double = isInDisplayedMonth ? 1.0 : 0.45
-
-        if todayBoost {
+        if day.isToday && isInDisplayedMonth {
             return Color.blue.opacity(0.14)
         }
-        return roleTint.opacity(roleTintOpacity * monthFactor)
-    }
-
-    private var roleBackgroundTint: Color {
-        switch resolvedDayRole {
-        case .workday:
-            return .clear
-        case .weekend:
-            return Color.gray
-        case .publicHoliday:
-            return Color.orange
-        case .makeupWorkday:
-            return Color.teal
+        let monthFactor: Double = isInDisplayedMonth ? 1.0 : 0.45
+        if isCalendarWeekend {
+            return Color.gray.opacity(0.08 * monthFactor)
         }
+        return .clear
     }
 
-    private var roleTintOpacity: Double {
-        switch resolvedDayRole {
-        case .workday:
-            return 0
-        case .weekend:
-            return schedule == nil ? 0.08 : 0.10
-        case .publicHoliday:
-            return 0.12
-        case .makeupWorkday:
-            return 0.12
-        }
-    }
-
-    /// 周末加班 / 法定假上班 / 调休补班 的角标。
-    private var roleBadgeText: String? {
+    private var kindBadgeText: String? {
         guard let schedule, schedule.isWorkLog, isInDisplayedMonth else { return nil }
-        switch schedule.dayRole {
-        case .weekend:
+        switch schedule.kind {
+        case .weekendOvertime:
             return "加"
-        case .publicHoliday:
-            return "假加"
-        case .makeupWorkday:
-            return "补"
-        case .workday:
+        case .weekendCompensatory:
+            return "调"
+        case .work, .off:
             return nil
         }
     }
@@ -460,13 +428,5 @@ struct MonthDayCell: View {
 
     private var badgeBackground: Color {
         Color.primary.opacity(isInDisplayedMonth ? 0.08 : 0.04)
-    }
-
-    private func nonWorkShortLabel(for schedule: WorkSchedule) -> String {
-        if schedule.kind == .custom {
-            let trimmed = schedule.note.trimmingCharacters(in: .whitespacesAndNewlines)
-            return trimmed.isEmpty ? schedule.kind.shortTitle : trimmed
-        }
-        return schedule.kind.shortTitle
     }
 }

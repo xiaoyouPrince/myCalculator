@@ -6,9 +6,7 @@ struct DayView: View {
     @Binding var emphasizesEffectiveOvertime: Bool
     @Environment(\.workCalculationRuleID) private var workCalculationRuleID
     @State private var showEditPanel = false
-    @State private var selectedDayRole: DayRole = .workday
     @State private var selectedKind: WorkLogKind = .work
-    @State private var customNote = ""
     @State private var workStartTime: Date = DayView.makeTime(hour: 9, minute: 0)
     @State private var workEndTime: Date = DayView.makeTime(hour: 18, minute: 0)
 
@@ -37,7 +35,7 @@ struct DayView: View {
                 }
                 .font(.body)
             } else {
-                Text("当日暂无记录，点击右上角“编辑”填写上下班时间。")
+                Text("当日暂无记录，点击右上角“编辑”填写。")
                     .foregroundStyle(.secondary)
             }
 
@@ -47,9 +45,7 @@ struct DayView: View {
         .sheet(isPresented: $showEditPanel) {
             WorkTimeInputPanel(
                 targetDate: normalizedDay(date),
-                selectedDayRole: $selectedDayRole,
                 selectedKind: $selectedKind,
-                customNote: $customNote,
                 workStartTime: $workStartTime,
                 workEndTime: $workEndTime,
                 onSave: {
@@ -62,7 +58,7 @@ struct DayView: View {
                     showEditPanel = false
                 }
             )
-            .frame(width: 380, height: 360)
+            .frame(width: 380, height: 320)
         }
     }
 
@@ -75,9 +71,7 @@ struct DayView: View {
     private func prepareEditor() {
         let key = normalizedDay(date)
         if let schedule = daySchedules[key] {
-            selectedDayRole = schedule.dayRole
             selectedKind = schedule.kind
-            customNote = schedule.kind == .custom ? schedule.note : ""
             if schedule.isWorkLog {
                 workStartTime = DayView.makeTime(hour: schedule.startHour, minute: schedule.startMinute)
                 workEndTime = DayView.makeTime(hour: schedule.endHour, minute: schedule.endMinute)
@@ -86,9 +80,7 @@ struct DayView: View {
                 workEndTime = DayView.makeTime(hour: 18, minute: 0)
             }
         } else {
-            selectedDayRole = DayRole.inferred(from: key)
             selectedKind = .work
-            customNote = ""
             workStartTime = DayView.makeTime(hour: 9, minute: 0)
             workEndTime = DayView.makeTime(hour: 18, minute: 0)
         }
@@ -106,21 +98,15 @@ struct DayView: View {
     }
 
     private func makeScheduleFromEditor() -> WorkSchedule {
-        if selectedKind == .work {
+        if selectedKind.isWorkLog {
             return WorkSchedule(
                 startHour: Calendar.current.component(.hour, from: workStartTime),
                 startMinute: Calendar.current.component(.minute, from: workStartTime),
                 endHour: Calendar.current.component(.hour, from: workEndTime),
                 endMinute: Calendar.current.component(.minute, from: workEndTime),
-                dayRole: selectedDayRole,
-                kind: .work
+                kind: selectedKind
             )
         }
-
-        return WorkSchedule(
-            dayRole: selectedDayRole,
-            kind: selectedKind,
-            note: selectedKind == .custom ? customNote.trimmingCharacters(in: .whitespacesAndNewlines) : ""
-        )
+        return WorkSchedule(kind: .off)
     }
 }

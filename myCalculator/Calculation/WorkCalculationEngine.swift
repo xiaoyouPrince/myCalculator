@@ -25,6 +25,7 @@ enum WorkCalculationEngine {
         var totalDeclaredWorkHours = 0.0
         var totalOvertimeHours = 0.0
         var totalEffectiveOvertimeHours = 0.0
+        var totalCompensatoryLeaveHours = 0.0
 
         for entry in entries {
             let metrics = metrics(date: entry.date, schedule: entry.schedule, ruleID: ruleID)
@@ -32,6 +33,7 @@ enum WorkCalculationEngine {
             totalDeclaredWorkHours += metrics.declaredWorkHours
             totalOvertimeHours += metrics.overtimeHours
             totalEffectiveOvertimeHours += metrics.effectiveOvertimeHours
+            totalCompensatoryLeaveHours += metrics.compensatoryLeaveHours
         }
 
         return WeekSummary(
@@ -39,7 +41,8 @@ enum WorkCalculationEngine {
             workHours: Double(totalWorkMinutes) / 60.0,
             declaredWorkHours: totalDeclaredWorkHours,
             overtimeHours: totalOvertimeHours,
-            effectiveOvertimeHours: totalEffectiveOvertimeHours
+            effectiveOvertimeHours: totalEffectiveOvertimeHours,
+            compensatoryLeaveHours: totalCompensatoryLeaveHours
         )
     }
 

@@ -2,9 +2,7 @@ import SwiftUI
 
 struct WorkTimeInputPanel: View {
     let targetDate: Date
-    @Binding var selectedDayRole: DayRole
     @Binding var selectedKind: WorkLogKind
-    @Binding var customNote: String
     @Binding var workStartTime: Date
     @Binding var workEndTime: Date
     let onSave: () -> Void
@@ -17,10 +15,6 @@ struct WorkTimeInputPanel: View {
         targetDate.formatted(.dateTime.year().month().day().weekday(.abbreviated))
     }
 
-    private var canSave: Bool {
-        selectedKind != .custom || !customNote.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-    }
-
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             Text("设置记录")
@@ -28,35 +22,22 @@ struct WorkTimeInputPanel: View {
             Text(dateTitle)
                 .foregroundStyle(.secondary)
 
-            HStack(alignment: .firstTextBaseline, spacing: 12) {
-                Picker("今天是什么日", selection: $selectedDayRole) {
-                    ForEach(DayRole.allCases) { role in
-                        Text(role.title).tag(role)
-                    }
-                }
-                .pickerStyle(.menu)
-
-                Button("按日历默认") {
-                    selectedDayRole = DayRole.inferred(from: targetDate)
-                }
-                .buttonStyle(.bordered)
-            }
-
-            Picker("实际做什么", selection: $selectedKind) {
+            Picker("出勤", selection: $selectedKind) {
                 ForEach(WorkLogKind.allCases) { kind in
                     Text(kind.title).tag(kind)
                 }
             }
             .pickerStyle(.menu)
 
-            if selectedKind == .work {
+            if selectedKind.isWorkLog {
                 TimeInputRow(title: "上班时间", value: $workStartTime, isPresented: $showStartPicker)
                 TimeInputRow(title: "下班时间", value: $workEndTime, isPresented: $showEndPicker)
-            } else if selectedKind == .custom {
-                TextField("输入自定义内容", text: $customNote)
-                    .textFieldStyle(.roundedBorder)
+
+                Text(kindHint)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             } else {
-                Text("\(selectedDayRole.title) · \(selectedKind.title)")
+                Text("不上班：不记录时间与工时")
                     .font(.body.weight(.medium))
                     .foregroundStyle(.secondary)
             }
@@ -68,16 +49,28 @@ struct WorkTimeInputPanel: View {
                 Button("取消", action: onCancel)
                 Button("保存", action: onSave)
                     .keyboardShortcut(.defaultAction)
-                    .disabled(!canSave)
             }
         }
         .padding(20)
+    }
+
+    private var kindHint: String {
+        switch selectedKind {
+        case .work:
+            return "工时申报与加班按正常工作日规则统计"
+        case .weekendOvertime:
+            return "工时申报与加班均按正常工作日规则（计入加班工资）"
+        case .weekendCompensatory:
+            return "工时申报照常；不计加班工资，超额记入调休额度"
+        case .off:
+            return ""
+        }
     }
 }
 
 struct WorkDetailPanel: View {
     let targetDate: Date
-    let dayRole: DayRole
+    let kind: WorkLogKind
     let summary: MonthScheduleSummary
     let emphasizesEffectiveOvertime: Bool
     let onEdit: () -> Void
@@ -89,7 +82,7 @@ struct WorkDetailPanel: View {
                 .font(.title3.bold())
             Text(targetDate.formatted(.dateTime.year().month().day().weekday(.abbreviated)))
                 .foregroundStyle(.secondary)
-            Text("日历角色：\(dayRole.title)")
+            Text(kind.title)
                 .foregroundStyle(.secondary)
 
             Divider()
